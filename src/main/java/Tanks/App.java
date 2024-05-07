@@ -114,26 +114,26 @@ public class App extends PApplet {
     
     public void keyPressed(KeyEvent event){
         List<Tank> tanks = LevelRenderer.getTanks();
-        if (this.keyCode == 37) {
-            // for (Tank tank : tanks) {
-            //     tank.moveTank(moveTankBy);
-            // }
+        if (this.keyCode == 37) {//left
             tanks.get(selectedTankIndex).moveTank(-1);
-        } else if (this.keyCode == 39) {
+
+        } else if (this.keyCode == 39) {//right
             // LevelRenderer.moveTanks(selectedTankIndex, moveTankBy);
             // for (Tank tank : tanks) {
             //     tank.moveTank(moveTankBy);
             // }
             tanks.get(selectedTankIndex).moveTank(1);
-            //right
-        } else if (this.keyCode == 38) {
-            //up
-        } else if (this.keyCode == 34) {
-            //down
-        }else if (this.keyCode == 49) { // Key '1' pressed
-            selectedTankIndex = 2; // Move the first tank
-        } else if (this.keyCode == 50) { // Key '2' pressed
-            selectedTankIndex = 1; // Move the second tank
+
+        } else if (this.keyCode == 38) {//up
+            tanks.get(selectedTankIndex).moveTurret(3);
+            
+        } else if (this.keyCode == 40) {//down
+            tanks.get(selectedTankIndex).moveTurret(-3);
+            
+        }else if (this.keyCode == 49) { 
+            selectedTankIndex = 2; 
+        } else if (this.keyCode == 50) {
+            selectedTankIndex = 1;
         } 
     }
 

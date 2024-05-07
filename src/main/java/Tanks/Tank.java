@@ -34,24 +34,29 @@ public class Tank {
     public void moveTurret(int moveTurret) {
         this.moveTurretBy+=moveTurret;
         render(smoothedTerrainArray);
+        System.out.println(moveTurretBy);
     }
     
     public void render(List<Float> smoothedTerrainArray) {
         int xSize = (x*32) + moveTankBy;
         if  (smoothedTerrainArray.size() > xSize) {
             Float y1 = smoothedTerrainArray.get(xSize);
+            // tank movement
             int index = c - 'A'; 
             float tankX = x * CELLSIZE + moveTankBy;
             float tankY = y1 * CELLSIZE;
+            // tank shape
             parent.fill(colors[index]);
             parent.ellipse(tankX, tankY, CELLSIZE, CELLSIZE/2);
             parent.ellipse(tankX, tankY-10, CELLSIZE/2, CELLSIZE/4);
             parent.fill(0);
-
+            // turret movement
             parent.pushMatrix();
-            float rotationAngle = PApplet.radians(moveTankBy % 60);
+            parent.translate(tankX, tankY-10);
+            float rotationAngle = PApplet.radians(moveTurretBy);
+            // float rotationAngle = moveTurretBy;
             parent.rotate(rotationAngle);
-            parent.ellipse(tankX, tankY-16, CELLSIZE/8, CELLSIZE/2);
+            parent.ellipse(0, -6, CELLSIZE/8, CELLSIZE/2);
             parent.popMatrix();
         }
     }
