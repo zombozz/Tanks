@@ -12,9 +12,18 @@ public class Tank {
     private int x;
     private float y;
     private int CELLSIZE;
-    private List<Float> smoothedTerrainArray = new ArrayList<>();
+    private List<Float> smoothedTerrainArray;
+
     private int moveTankBy = 0;
     private int moveTurretBy = 0;
+    private boolean turretShot = false;
+
+    private Projectile projectile;
+    private float rotationAngle;
+
+    private float tankX;
+    private float tankY;
+    private float y1;
 
     public Tank(PApplet parent, char c, int[] colors, int x, float y, int size, List<Float> smoothedTerrainArray) {
         this.parent = parent;
@@ -26,25 +35,32 @@ public class Tank {
         this.smoothedTerrainArray = smoothedTerrainArray;
     }
 
-
     public void moveTank(int moveTank) {
         this.moveTankBy+=moveTank;
         render(smoothedTerrainArray);
     }
+
     public void moveTurret(int moveTurret) {
         this.moveTurretBy+=moveTurret;
         render(smoothedTerrainArray);
-        System.out.println(moveTurretBy);
+    }
+
+    
+    public void shootTurret() {
+        float projectileSpeed = 5; // Set the speed of the projectile
+        projectile = new Projectile(parent, tankX, tankY - 10, projectileSpeed, moveTurretBy);
+        System.out.println("'BOOM!'");
     }
     
     public void render(List<Float> smoothedTerrainArray) {
+        this.smoothedTerrainArray = smoothedTerrainArray;
         int xSize = (x*32) + moveTankBy;
         if  (smoothedTerrainArray.size() > xSize) {
-            Float y1 = smoothedTerrainArray.get(xSize);
+            y1 = smoothedTerrainArray.get(xSize);
             // tank movement
             int index = c - 'A'; 
-            float tankX = x * CELLSIZE + moveTankBy;
-            float tankY = y1 * CELLSIZE;
+            tankX = x * CELLSIZE + moveTankBy;
+            tankY = y1 * CELLSIZE;
             // tank shape
             parent.fill(colors[index]);
             parent.ellipse(tankX, tankY, CELLSIZE, CELLSIZE/2);
@@ -53,11 +69,19 @@ public class Tank {
             // turret movement
             parent.pushMatrix();
             parent.translate(tankX, tankY-10);
-            float rotationAngle = PApplet.radians(moveTurretBy);
-            // float rotationAngle = moveTurretBy;
+            rotationAngle = PApplet.radians(moveTurretBy);
             parent.rotate(rotationAngle);
-            parent.ellipse(0, -6, CELLSIZE/8, CELLSIZE/2);
+            parent.ellipse(0, -6, CELLSIZE/2, CELLSIZE*2);
             parent.popMatrix();
+            if (projectile != null) {
+                projectile.update(); // Update the projectile's position
+                projectile.display(); // Display the projectile
+    
+                // Check if the projectile has gone off screen
+                if (projectile.projectileLanded()) {
+                    projectile = null; // Delete the projectile
+                }
+            }
         }
     }
 

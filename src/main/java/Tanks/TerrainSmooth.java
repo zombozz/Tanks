@@ -54,7 +54,7 @@ public class TerrainSmooth {
             float average = sum / 32; // Compute average
             smoothedHeights2.add(average); // Add average to the smoothed heights list
         }
-        for (int k = 0; k < 32; k++) {
+        for (int k = 0; k < 32; k++) { 
             smoothedHeights2.add(smoothedHeights2.get(smoothedHeights2.size() - 1));
         }
         return smoothedHeights2;

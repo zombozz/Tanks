@@ -125,15 +125,20 @@ public class App extends PApplet {
             tanks.get(selectedTankIndex).moveTank(1);
 
         } else if (this.keyCode == 38) {//up
-            tanks.get(selectedTankIndex).moveTurret(3);
+            tanks.get(selectedTankIndex).moveTurret(-6);
             
         } else if (this.keyCode == 40) {//down
-            tanks.get(selectedTankIndex).moveTurret(-3);
+            tanks.get(selectedTankIndex).moveTurret(6);
             
+        }else if (this.keyCode == 32) { 
+            tanks.get(selectedTankIndex).shootTurret();
+            selectedTankIndex += 1;
         }else if (this.keyCode == 49) { 
             selectedTankIndex = 2; 
         } else if (this.keyCode == 50) {
             selectedTankIndex = 1;
+        } else if (this.keyCode == 35) {
+            exit();
         } 
     }
 
