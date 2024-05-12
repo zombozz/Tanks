@@ -7,7 +7,7 @@ import processing.core.PApplet;
 
 public class Tank {
     private PApplet parent;
-    private char c;
+    public char c;
     private int[] colors;
     private int x;
     private float y;
@@ -16,7 +16,6 @@ public class Tank {
 
     private int moveTankBy = 0;
     private int moveTurretBy = 0;
-    private boolean turretShot = false;
 
     private Projectile projectile;
     private float rotationAngle;
@@ -25,7 +24,10 @@ public class Tank {
     private float tankY;
     private float y1;
 
+    private List<Projectile> projectiles;
+
     public Tank(PApplet parent, char c, int[] colors, int x, float y, int size, List<Float> smoothedTerrainArray) {
+        projectiles = new ArrayList<>();
         this.parent = parent;
         this.c = c;
         this.colors = colors;
@@ -33,6 +35,16 @@ public class Tank {
         this.y = y;
         this.CELLSIZE = size;
         this.smoothedTerrainArray = smoothedTerrainArray;
+    }
+
+    public char getC(){
+        return c;
+    }
+    public float getTankMovement(){
+        return moveTankBy;
+    }
+    public float getY(){
+        return tankY;
     }
 
     public void moveTank(int moveTank) {
@@ -45,11 +57,10 @@ public class Tank {
         render(smoothedTerrainArray);
     }
 
-    
     public void shootTurret() {
-        float projectileSpeed = 5; // Set the speed of the projectile
-        projectile = new Projectile(parent, tankX, tankY - 10, projectileSpeed, moveTurretBy);
-        System.out.println("'BOOM!'");
+        float projectileSpeed = 50; // Set the speed of the projectile
+        projectile = new Projectile(parent, tankX, tankY - 10, projectileSpeed, CELLSIZE, moveTurretBy, smoothedTerrainArray);
+        projectiles.add(projectile);
     }
     
     public void render(List<Float> smoothedTerrainArray) {
@@ -71,16 +82,19 @@ public class Tank {
             parent.translate(tankX, tankY-10);
             rotationAngle = PApplet.radians(moveTurretBy);
             parent.rotate(rotationAngle);
-            parent.ellipse(0, -6, CELLSIZE/2, CELLSIZE*2);
+            parent.ellipse(0, -6, CELLSIZE/8, CELLSIZE/2);
             parent.popMatrix();
-            if (projectile != null) {
-                projectile.update(); // Update the projectile's position
-                projectile.display(); // Display the projectile
-    
-                // Check if the projectile has gone off screen
-                if (projectile.projectileLanded()) {
-                    projectile = null; // Delete the projectile
+            try {
+                if (!projectile.isNull) {
+                    
+                    projectile.update(); // Update the projectile's position
+                    projectile.display();
+                    // if (projectile.projectileLanded()) {
+                    //     projectile = null; // Delete the projectile
+                    // }
                 }
+            } catch (NullPointerException e)  {
+
             }
         }
     }

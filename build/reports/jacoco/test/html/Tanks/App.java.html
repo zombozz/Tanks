@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>App.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tanks_scaffold</a> &gt; <a href="index.source.html" class="el_package">Tanks</a> &gt; <span class="el_source">App.java</span></div><h1>App.java</h1><pre class="source lang-java linenums">package Tanks;
+
+import org.checkerframework.checker.units.qual.A;
+import processing.core.PApplet;
+import processing.core.PImage;
+// import processing.data.JSONArray;
+// import processing.data.JSONObject;
+import processing.event.KeyEvent;
+import processing.event.MouseEvent;
+
+import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+
+import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import com.jogamp.opengl.util.packrect.Level;
+
+import java.io.*;
+import java.util.*;
+import java.util.List;
+
+public class App extends PApplet {
+    LevelRenderer levelRenderer;
+<span class="nc" id="L28">    public static int levelNo = 0;</span>
+    public static final int CELLSIZE = 32; //8;
+    public static final int CELLHEIGHT = 32;
+    private Tank tank;
+    private static int tanksNum;
+<span class="nc" id="L33">    private static int selectedTankIndex = 0;</span>
+
+    public static final int CELLAVG = 32;
+    public static final int TOPBAR = 0;
+<span class="nc" id="L37">    public static int WIDTH = 864; //CELLSIZE*BOARD_WIDTH;</span>
+<span class="nc" id="L38">    public static int HEIGHT = 640; //BOARD_HEIGHT*CELLSIZE+TOPBAR;</span>
+<span class="nc" id="L39">    public static final int BOARD_WIDTH = WIDTH/CELLSIZE;</span>
+    public static final int BOARD_HEIGHT = 20;
+
+    public static final int INITIAL_PARACHUTES = 1;
+
+    public static final int FPS = 30;
+
+    public String configPath;
+
+<span class="nc" id="L48">    public static Random random = new Random();</span>
+	
+	// Feel free to add any additional methods or attributes you want. Please put classes in different files.
+
+<span class="nc" id="L52">    public App() {</span>
+<span class="nc" id="L53">        this.configPath = &quot;config.json&quot;;</span>
+<span class="nc" id="L54">    }</span>
+
+    /**
+     * Initialise the setting of the window size.
+     */
+	@Override
+    public void settings() {
+<span class="nc" id="L61">        size(WIDTH, HEIGHT);</span>
+<span class="nc" id="L62">    }</span>
+
+    /**
+     * Load all resources such as images. Initialise the elements such as the player and map elements.
+     */
+    PImage backgroundImage;
+    PImage treesImage;
+    String[] levelLines;
+<span class="nc" id="L70">    int[] playerColors = {</span>
+<span class="nc" id="L71">        color(0, 0, 255),   // Blue for player A</span>
+<span class="nc" id="L72">        color(255, 0, 0),   // Red for player B</span>
+<span class="nc" id="L73">        color(0, 255, 255),   // Aqua for player C</span>
+<span class="nc" id="L74">        color(255, 255, 0),   // Yellow for player D</span>
+<span class="nc" id="L75">        color(0, 255, 0),   // Green for player E</span>
+        // Add more colors for other players if needed
+    };
+    int terrainColor;
+	@Override
+    public void setup() {
+<span class="nc" id="L81">        frameRate(FPS);</span>
+<span class="nc" id="L82">        levelRenderer = new LevelRenderer();</span>
+<span class="nc" id="L83">        JSONParser parser = new JSONParser();</span>
+        try {
+<span class="nc" id="L85">            JSONObject config = (JSONObject) parser.parse(new FileReader(&quot;config.json&quot;));</span>
+<span class="nc" id="L86">            JSONArray levels = (JSONArray) config.get(&quot;levels&quot;);</span>
+<span class="nc" id="L87">            JSONObject level1 = (JSONObject) levels.get(levelNo);</span>
+
+<span class="nc" id="L89">            String layoutFilename = (String) level1.get(&quot;layout&quot;);</span>
+<span class="nc" id="L90">            levelLines = loadStrings(layoutFilename);</span>
+
+<span class="nc" id="L92">            String backgroundFilename = (String) level1.get(&quot;background&quot;);</span>
+<span class="nc" id="L93">            String foregroundColour = (String) level1.get(&quot;foreground-colour&quot;);</span>
+<span class="nc" id="L94">            String[] components = foregroundColour.split(&quot;,&quot;);</span>
+<span class="nc" id="L95">            int r = Integer.parseInt(components[0]);</span>
+<span class="nc" id="L96">            int g = Integer.parseInt(components[1]);</span>
+<span class="nc" id="L97">            int b = Integer.parseInt(components[2]);</span>
+<span class="nc" id="L98">            terrainColor = color(r, g, b);</span>
+
+<span class="nc bnc" id="L100" title="All 2 branches missed.">            if (level1.containsKey(&quot;trees&quot;)) {</span>
+<span class="nc" id="L101">                String treesFilename = (String) level1.get(&quot;trees&quot;);</span>
+<span class="nc" id="L102">                treesImage = loadImage(&quot;src\\main\\resources\\Tanks\\&quot;+treesFilename);</span>
+<span class="nc" id="L103">            } else {</span>
+<span class="nc" id="L104">                treesImage = loadImage(&quot;src\\main\\resources\\Tanks\\fuel.png&quot;);</span>
+            }
+
+<span class="nc" id="L107">            backgroundImage = loadImage(&quot;src\\main\\resources\\Tanks\\&quot;+backgroundFilename);</span>
+<span class="nc" id="L108">        } catch (IOException | ParseException e) {</span>
+<span class="nc" id="L109">            e.printStackTrace();</span>
+<span class="nc" id="L110">        }</span>
+<span class="nc" id="L111">    }</span>
+
+	@Override
+    
+    public void keyPressed(KeyEvent event){
+<span class="nc" id="L116">        List&lt;Tank&gt; tanks = LevelRenderer.getTanks();</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">        if (this.keyCode == 37) {//left</span>
+<span class="nc" id="L118">            tanks.get(selectedTankIndex).moveTank(-1);</span>
+
+<span class="nc bnc" id="L120" title="All 2 branches missed.">        } else if (this.keyCode == 39) {//right</span>
+            // LevelRenderer.moveTanks(selectedTankIndex, moveTankBy);
+            // for (Tank tank : tanks) {
+            //     tank.moveTank(moveTankBy);
+            // }
+<span class="nc" id="L125">            System.out.println(tanks.get(selectedTankIndex).getX());</span>
+            
+<span class="nc" id="L127">            tanks.get(selectedTankIndex).moveTank(1);</span>
+<span class="nc" id="L128">            System.out.println(tanks.get(selectedTankIndex).getX());</span>
+
+<span class="nc bnc" id="L130" title="All 2 branches missed.">        } else if (this.keyCode == 38) {//up</span>
+<span class="nc" id="L131">            tanks.get(selectedTankIndex).moveTurret(-6);</span>
+            
+<span class="nc bnc" id="L133" title="All 2 branches missed.">        } else if (this.keyCode == 40) {//down</span>
+<span class="nc" id="L134">            tanks.get(selectedTankIndex).moveTurret(6);</span>
+            
+<span class="nc bnc" id="L136" title="All 2 branches missed.">        }else if (this.keyCode == 32) { </span>
+<span class="nc" id="L137">            tanks.get(selectedTankIndex).shootTurret();</span>
+<span class="nc" id="L138">            selectedTankIndex += 1;</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">            if(selectedTankIndex &gt;= tanksNum){</span>
+<span class="nc" id="L140">                selectedTankIndex=0;</span>
+            }
+<span class="nc bnc" id="L142" title="All 2 branches missed.">        }else if (this.keyCode == 49) { </span>
+<span class="nc" id="L143">            selectedTankIndex = 2; </span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">        } else if (this.keyCode == 50) {</span>
+<span class="nc" id="L145">            selectedTankIndex = 1;</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        } else if (this.keyCode == 35) {</span>
+<span class="nc" id="L147">            exit();</span>
+        } 
+<span class="nc" id="L149">    }</span>
+
+	@Override
+    public void keyReleased(){
+        
+<span class="nc" id="L154">    }</span>
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        //TODO - powerups, like repair and extra fuel and teleport
+
+
+<span class="nc" id="L161">    }</span>
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+
+<span class="nc" id="L166">    }</span>
+    
+	@Override
+    public void draw() {
+<span class="nc" id="L170">        noStroke();</span>
+<span class="nc" id="L171">        image(backgroundImage, 0, 0, width, height);</span>
+<span class="nc" id="L172">        LevelRenderer.renderLevel(this, levelLines, playerColors, terrainColor, treesImage, CELLSIZE);</span>
+<span class="nc" id="L173">        levelRenderer.smoothTerrain();</span>
+<span class="nc" id="L174">        tanksNum = levelRenderer.tanksNum;</span>
+        
+        //----------------------------------
+        //display HUD:
+        //----------------------------------
+        //TODO
+
+        //----------------------------------
+        //display scoreboard:
+        //----------------------------------
+        //TODO
+        
+		//----------------------------------
+        //----------------------------------
+
+        //TODO: Check user action
+<span class="nc" id="L190">    }</span>
+
+
+    public static void main(String[] args) {
+<span class="nc" id="L194">        PApplet.main(&quot;Tanks.App&quot;);</span>
+<span class="nc" id="L195">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -25,19 +25,29 @@ import java.util.*;
 public class LevelRenderer {
     private static Map<Integer, Integer> heights = new HashMap<>();
     private static TerrainSmooth terrainSmooth;
-    private static List<Float> smoothedTerrainArray = new ArrayList<>();
+    public static List<Float> smoothedTerrainArray = new ArrayList<>();
     private static List<Tank> tanks = new ArrayList<>();
     private static float yCoord;
     private static int xSize;
     private static int moveBy;
-    private static int bruh;
+    public static int tanksNum;
     private static Set<Character> tankIds = new HashSet<>();
+
+    private static int ScreenY= App.HEIGHT;
+    private static int ScreenX = App.WIDTH;
+
+    private static List<Integer> treeXArray = new ArrayList<>();
+    private static List<Integer> treeYArray = new ArrayList<>();
+    private static List<Integer> tankXArray = new ArrayList<>();
+    private static List<Integer> tankYArray = new ArrayList<>();
+
+    private static boolean finishedRendering = false;
     
     public static void renderLevel(PApplet parent, String[] levelLines, int[] playerColors, int terrainColor, PImage treesImage, int CELLSIZE) {
         terrainSmooth = new TerrainSmooth(parent, terrainColor, CELLSIZE, heights);
+        if(!finishedRendering){
         for (int y = 0; y < levelLines.length; y++) {
             String line = levelLines[y];
-
             for (int x = 0; x < line.length(); x++) {
                 char c = line.charAt(x);
                 switch(c) {
@@ -48,6 +58,8 @@ public class LevelRenderer {
                         // parent.rect(x * CELLSIZE, y * CELLSIZE, CELLSIZE, (20-y)*CELLSIZE);
                         break;
                     case 'T':
+                        treeXArray.add(x);
+                        treeYArray.add(y);
                         drawTrees(parent, x, y, CELLSIZE, treesImage);
                         break;
                     case ' ':
@@ -58,25 +70,76 @@ public class LevelRenderer {
                 }
             }
         }
-    }
-    private boolean terrainSmoothed = false;
-    private int no = 0;
-    public void smoothTerrain() {
+        // smoothTerrain();
         smoothedTerrainArray = terrainSmooth.smooth();
-        terrainSmoothed = true;
+        finishedRendering = true;
+        } else {
+            for (Map.Entry<Integer, Integer> entry : heights.entrySet()) {
+                int x = entry.getKey();
+                int y = entry.getValue();
+                drawTerrain(parent, terrainColor, x, y, CELLSIZE);
+            }
+            for (int i = 0; i < treeXArray.size(); i++) {
+                drawTrees(parent, treeXArray.get(i), treeYArray.get(i), CELLSIZE, treesImage);
+            }
+        }
+        renderAllTanks();
     }
+    // private boolean terrainSmoothed = false;
+    // public static void smoothTerrain() {
+    //     smoothedTerrainArray = terrainSmooth.smooth();
+    //     // terrainSmoothed = true;
+    // }
 
-
+    public static void updateTerrainAfterExplosion(int explosionX, int explosionY) {
+        // Update heights map based on the explosion coordinates
+        int xRange = 0;
+        boolean middleReached = false;
+        for (int x = explosionX - 30; x <= explosionX + 30; x++) {
+            // for (int y = explosionY - 30; y <= explosionY + 30; y++) {
+                // Check if the coordinate is within the bounds of the level
+                if(xRange==30 && !middleReached){
+                    middleReached = true;
+                } else if (middleReached){
+                    xRange-=1;
+                } else {
+                    xRange+=1;
+                }
+                if (x >= 0 && x < ScreenX) {
+                    // Update the heights map to reflect destruction caused by the explosion
+                    float currentVal = smoothedTerrainArray.get(x);
+                    currentVal +=0.3*xRange/30;
+                    smoothedTerrainArray.set(x, currentVal);
+                }
+            // }
+        }
+    }
+    private static void removeTerrainAtCoordinate(List<Float> smoothedTerrainArray, int x, int y) {
+        // Iterate through the list to find the elements with matching coordinates
+        Iterator<Float> iterator = smoothedTerrainArray.iterator();
+        while (iterator.hasNext()) {
+            Float terrainHeight = iterator.next();
+            // Calculate the index of the current terrainHeight in the smoothedTerrainArray
+            int index = smoothedTerrainArray.indexOf(terrainHeight);
+            // Calculate the corresponding (x, y) coordinates for the terrainHeight
+            int terrainX = index % ScreenX;
+            int terrainY = index / ScreenX;
+            // Check if the coordinates match the specified (x, y)
+            if (terrainX == x && terrainY == y) {
+                // Remove the element from the list
+                iterator.remove();
+            }
+        }
+    }
 
 private static void drawTerrain(PApplet parent, int terrainColor, int x, int y, int CELLSIZE) {
     int x1=0;
     for (Float y1: smoothedTerrainArray) {
         parent.fill(terrainColor);
         parent.rect(x1, y1*CELLSIZE, 1, (20-y1)*CELLSIZE);
-        // parent.rect(x1, y1*CELLSIZE, 1, 5);
-        // parent.fill(0,0,0,20);
         x1+=1;
     }
+    
 }
 
 private static void drawTrees(PApplet parent, int x, int y, int CELLSIZE, PImage treesImage) {
@@ -90,40 +153,22 @@ private static void drawTrees(PApplet parent, int x, int y, int CELLSIZE, PImage
 
 private static void drawTanks(PApplet parent, char c, int x, int y, int[] playerColors, int CELLSIZE, List<Float> smoothedTerrainArray) {
     if (tanks.size() < 5 && !tankIds.contains(c) && c >= 'A' && c <= 'E') {
-        bruh+=1;
-        System.out.println(bruh);
-        System.out.println(tanks);
-        System.out.println(tankIds);
+        tanksNum+=1;
+        // System.out.println(tanks);
+        // System.out.println(tankIds);
         Tank tank = new Tank(parent, c, playerColors, x, y, CELLSIZE, smoothedTerrainArray);
         tanks.add(tank);
         tankIds.add(c);
     } 
+}
+public static void renderAllTanks() {
     for (Tank tank : tanks) {
         // System.out.println(tank.getInfo());
         tank.render(smoothedTerrainArray);
     }
-    // xSize = (x*32);
-    // if ((c >= 'A' && c <= 'E') && ((smoothedTerrainArray.size() > xSize))) {
-    //     Float y1 = smoothedTerrainArray.get(xSize);
-    //     int index = c - 'A'; 
-    //     float tankX = x * CELLSIZE;
-    //     float tankY = y1 * CELLSIZE;
-    //     Tank tank = new Tank(parent, playerColors[index], tankX, tankY, CELLSIZE);
-    //     // parent.rect(tankX, tankY, CELLSIZE, CELLSIZE);
-    //     // parent.fill(0,0,0,20);
-    //     tanks.add(tank);
-    //     tank.render();
-    //     // tank.moveTank(moveBy); // Render tanks
-    // }
 }
 public static List<Tank> getTanks() {
+    Collections.sort(tanks, Comparator.comparingInt(tank -> tank.getC() - 'A'));
     return tanks;
 }
-// public static void moveTanks(int tankIndex, int moveByAmount) {
-//     moveBy = moveByAmount;
-//     if (tankIndex >= 0 && tankIndex < tanks.size()) {
-//         Tank tank = tanks.get(tankIndex);
-//         tank.moveTank(moveByAmount);
-//     }
-// }
 }

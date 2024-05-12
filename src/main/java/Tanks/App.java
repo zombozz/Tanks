@@ -29,8 +29,8 @@ public class App extends PApplet {
     public static final int CELLSIZE = 32; //8;
     public static final int CELLHEIGHT = 32;
     private Tank tank;
-    // private static int moveTankBy;
-    private static int selectedTankIndex = 1;
+    private static int tanksNum;
+    private static int selectedTankIndex = 0;
 
     public static final int CELLAVG = 32;
     public static final int TOPBAR = 0;
@@ -46,6 +46,9 @@ public class App extends PApplet {
     public String configPath;
 
     public static Random random = new Random();
+
+    public static Timer timer;
+    
 	
 	// Feel free to add any additional methods or attributes you want. Please put classes in different files.
 
@@ -81,6 +84,8 @@ public class App extends PApplet {
         frameRate(FPS);
         levelRenderer = new LevelRenderer();
         JSONParser parser = new JSONParser();
+        timer = new Timer(this, this.millis());
+         
         try {
             JSONObject config = (JSONObject) parser.parse(new FileReader("config.json"));
             JSONArray levels = (JSONArray) config.get("levels");
@@ -116,14 +121,12 @@ public class App extends PApplet {
         List<Tank> tanks = LevelRenderer.getTanks();
         if (this.keyCode == 37) {//left
             tanks.get(selectedTankIndex).moveTank(-1);
-
         } else if (this.keyCode == 39) {//right
             // LevelRenderer.moveTanks(selectedTankIndex, moveTankBy);
             // for (Tank tank : tanks) {
             //     tank.moveTank(moveTankBy);
             // }
             tanks.get(selectedTankIndex).moveTank(1);
-
         } else if (this.keyCode == 38) {//up
             tanks.get(selectedTankIndex).moveTurret(-6);
             
@@ -133,6 +136,9 @@ public class App extends PApplet {
         }else if (this.keyCode == 32) { 
             tanks.get(selectedTankIndex).shootTurret();
             selectedTankIndex += 1;
+            if(selectedTankIndex >= tanksNum){
+                selectedTankIndex=0;
+            }
         }else if (this.keyCode == 49) { 
             selectedTankIndex = 2; 
         } else if (this.keyCode == 50) {
@@ -164,7 +170,8 @@ public class App extends PApplet {
         noStroke();
         image(backgroundImage, 0, 0, width, height);
         LevelRenderer.renderLevel(this, levelLines, playerColors, terrainColor, treesImage, CELLSIZE);
-        levelRenderer.smoothTerrain();
+        // levelRenderer.smoothTerrain();
+        tanksNum = levelRenderer.tanksNum;
         
         //----------------------------------
         //display HUD:

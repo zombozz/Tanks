@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Projectile.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tanks_scaffold</a> &gt; <a href="index.source.html" class="el_package">Tanks</a> &gt; <span class="el_source">Projectile.java</span></div><h1>Projectile.java</h1><pre class="source lang-java linenums">package Tanks;
+
+import processing.core.PApplet;
+import static processing.core.PApplet.cos;
+import static processing.core.PApplet.sin;
+
+public class Projectile {
+    private PApplet parent;
+    private float x;
+    private float y;
+    private float power;
+    private float CELLSIZE;
+    private float rotationAngle;
+<span class="nc" id="L14">    private int ScreenY= App.HEIGHT;</span>
+<span class="nc" id="L15">    private int ScreenX = App.WIDTH;</span>
+
+<span class="nc" id="L17">    public Projectile(PApplet parent, float x, float y, float power, int CELLSIZE, float rotationAngle) {</span>
+<span class="nc" id="L18">        this.parent = parent;</span>
+<span class="nc" id="L19">        this.x = x;</span>
+<span class="nc" id="L20">        this.y = y;</span>
+<span class="nc" id="L21">        this.power = power;</span>
+<span class="nc" id="L22">        this.rotationAngle = rotationAngle - 90;</span>
+<span class="nc" id="L23">        this.CELLSIZE = CELLSIZE;</span>
+<span class="nc" id="L24">    }</span>
+    public void update() {       
+<span class="nc" id="L26">        float angleInRadians = PApplet.radians(rotationAngle);</span>
+<span class="nc" id="L27">        float vx = power * cos(angleInRadians); // Calculate the x-component of velocity</span>
+<span class="nc" id="L28">        float vy = power * sin(angleInRadians); // Calculate the y-component of velocity</span>
+
+        // vy -= 3.6;
+<span class="nc" id="L31">        x += vx; // Update x position</span>
+<span class="nc" id="L32">        y += vy; // Update y position</span>
+<span class="nc" id="L33">    }</span>
+
+    public void display() {
+<span class="nc" id="L36">        parent.fill(255, 0, 0); // Set color to red</span>
+<span class="nc" id="L37">        parent.ellipse(x, y, CELLSIZE/8, CELLSIZE/8); // Draw the projectile as a circle</span>
+<span class="nc" id="L38">    }</span>
+
+    public boolean projectileLanded() {
+        // return (y &lt; 0 || y &gt; ScreenY || x &lt; 0 || x &lt; ScreenX);
+<span class="nc" id="L42">        return (false);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
