@@ -24,6 +24,9 @@ public class Tank {
     private float tankY;
     private float y1;
 
+    private int playerHealth = 100;
+    private int playerScore = 0;
+
     private List<Projectile> projectiles;
 
     public Tank(PApplet parent, char c, int[] colors, int x, float y, int size, List<Float> smoothedTerrainArray) {
@@ -86,12 +89,8 @@ public class Tank {
             parent.popMatrix();
             try {
                 if (!projectile.isNull) {
-                    
-                    projectile.update(); // Update the projectile's position
+                    projectile.update(); 
                     projectile.display();
-                    // if (projectile.projectileLanded()) {
-                    //     projectile = null; // Delete the projectile
-                    // }
                 }
             } catch (NullPointerException e)  {
 

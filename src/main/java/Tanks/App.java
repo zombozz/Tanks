@@ -24,6 +24,7 @@ import java.util.*;
 import java.util.List;
 
 public class App extends PApplet {
+    private GUI GUI;
     LevelRenderer levelRenderer;
     public static int levelNo = 0;
     public static final int CELLSIZE = 32; //8;
@@ -85,6 +86,11 @@ public class App extends PApplet {
         levelRenderer = new LevelRenderer();
         JSONParser parser = new JSONParser();
         timer = new Timer(this, this.millis());
+
+        GUI = new GUI(this);
+        PImage fuelImage = loadImage("src\\main\\resources\\Tanks\\fuel.png");
+        PImage windImage = loadImage("src\\main\\resources\\Tanks\\wind.png");
+        GUI.setImages(fuelImage, windImage, CELLSIZE);
          
         try {
             JSONObject config = (JSONObject) parser.parse(new FileReader("config.json"));
@@ -122,10 +128,6 @@ public class App extends PApplet {
         if (this.keyCode == 37) {//left
             tanks.get(selectedTankIndex).moveTank(-1);
         } else if (this.keyCode == 39) {//right
-            // LevelRenderer.moveTanks(selectedTankIndex, moveTankBy);
-            // for (Tank tank : tanks) {
-            //     tank.moveTank(moveTankBy);
-            // }
             tanks.get(selectedTankIndex).moveTank(1);
         } else if (this.keyCode == 38) {//up
             tanks.get(selectedTankIndex).moveTurret(-6);
@@ -139,6 +141,7 @@ public class App extends PApplet {
             if(selectedTankIndex >= tanksNum){
                 selectedTankIndex=0;
             }
+            GUI.setCurrentPlayerIndex(selectedTankIndex);
         }else if (this.keyCode == 49) { 
             selectedTankIndex = 2; 
         } else if (this.keyCode == 50) {
@@ -172,6 +175,7 @@ public class App extends PApplet {
         LevelRenderer.renderLevel(this, levelLines, playerColors, terrainColor, treesImage, CELLSIZE);
         // levelRenderer.smoothTerrain();
         tanksNum = levelRenderer.tanksNum;
+        GUI.displayGUIElements();
         
         //----------------------------------
         //display HUD:

@@ -114,23 +114,6 @@ public class LevelRenderer {
             // }
         }
     }
-    private static void removeTerrainAtCoordinate(List<Float> smoothedTerrainArray, int x, int y) {
-        // Iterate through the list to find the elements with matching coordinates
-        Iterator<Float> iterator = smoothedTerrainArray.iterator();
-        while (iterator.hasNext()) {
-            Float terrainHeight = iterator.next();
-            // Calculate the index of the current terrainHeight in the smoothedTerrainArray
-            int index = smoothedTerrainArray.indexOf(terrainHeight);
-            // Calculate the corresponding (x, y) coordinates for the terrainHeight
-            int terrainX = index % ScreenX;
-            int terrainY = index / ScreenX;
-            // Check if the coordinates match the specified (x, y)
-            if (terrainX == x && terrainY == y) {
-                // Remove the element from the list
-                iterator.remove();
-            }
-        }
-    }
 
 private static void drawTerrain(PApplet parent, int terrainColor, int x, int y, int CELLSIZE) {
     int x1=0;
