@@ -23,9 +23,21 @@ public class Tank {
     private float tankX;
     private float tankY;
     private float y1;
-
+    
+    private int playerFuel = 250;
     private int playerHealth = 100;
+    private int playerPower = 50;
     private int playerScore = 0;
+    private int windForce = (int) (Math.random() *(35+35) -35);
+
+    private int playerNum = 0;
+    private int i = 0;
+    private boolean initialDetailsSetup = false;
+    private GUI GUI;
+
+    private float[] explosionCoords;
+    private float[] oldExplosionCoords;
+
 
     private List<Projectile> projectiles;
 
@@ -39,7 +51,37 @@ public class Tank {
         this.CELLSIZE = size;
         this.smoothedTerrainArray = smoothedTerrainArray;
     }
+    public void setGUI(GUI GUI){
+        this.GUI=GUI;
+    }
+    public void checkDamage(){
+        
+        try{
+            oldExplosionCoords = explosionCoords;
+            explosionCoords = projectile.getExplosionCoords();
+            if(!(oldExplosionCoords[0]==explosionCoords[0])){
 
+                float explosionX = explosionCoords[0];
+                float explosionY = explosionCoords[1];
+                float distanceSquared = (x - explosionX) * (x - explosionX) + (y - explosionY) * (y - explosionY);
+                float distance = parent.sqrt(distanceSquared);
+                int explosionRadius =30;
+                 if (distance <= explosionRadius) {
+                // Calculate damage based on distance
+                float maxDamage = 60; // Maximum damage at 0 distance
+                float damage = maxDamage * (1 - distance / explosionRadius);
+
+                // Reduce player health based on damage
+                playerHealth -= damage;
+                
+                // Ensure playerHealth doesn't go below zero
+                if (playerHealth < 0) {
+                    playerHealth = 0;
+                }
+            }
+            }
+        } catch (NullPointerException e){}
+    }
     public char getC(){
         return c;
     }
@@ -50,8 +92,16 @@ public class Tank {
         return tankY;
     }
 
+    public void setPlayerNum(int playerNum){
+        this.playerNum = playerNum;
+        // System.out.println(playerNum);
+    }
+
     public void moveTank(int moveTank) {
-        this.moveTankBy+=moveTank;
+        if(playerFuel>0){
+            this.moveTankBy+=moveTank;
+            this.playerFuel-=1;
+        }
         render(smoothedTerrainArray);
     }
 
@@ -64,9 +114,18 @@ public class Tank {
         float projectileSpeed = 50; // Set the speed of the projectile
         projectile = new Projectile(parent, tankX, tankY - 10, projectileSpeed, CELLSIZE, moveTurretBy, smoothedTerrainArray);
         projectiles.add(projectile);
+        windForce+=(int) (Math.random() *(10) -5);
+    }
+
+    public void renderGUI(int i){
+        System.out.println(playerHealth);
+        if(GUI.getCurrentPlayerIndex()+1 ==i){
+            GUI.setPlayerDetails(playerFuel, playerHealth, playerPower, playerScore, windForce);
+        }
     }
     
     public void render(List<Float> smoothedTerrainArray) {
+        checkDamage();
         this.smoothedTerrainArray = smoothedTerrainArray;
         int xSize = (x*32) + moveTankBy;
         if  (smoothedTerrainArray.size() > xSize) {

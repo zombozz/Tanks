@@ -24,9 +24,12 @@ import java.util.*;
 import java.util.List;
 
 public class App extends PApplet {
-    private GUI GUI;
-    LevelRenderer levelRenderer;
+
     public static int levelNo = 0;
+
+
+    public static GUI GUI;
+    LevelRenderer levelRenderer;
     public static final int CELLSIZE = 32; //8;
     public static final int CELLHEIGHT = 32;
     private Tank tank;
@@ -50,6 +53,7 @@ public class App extends PApplet {
 
     public static Timer timer;
     
+    private boolean numSet = false;
 	
 	// Feel free to add any additional methods or attributes you want. Please put classes in different files.
 
@@ -91,6 +95,7 @@ public class App extends PApplet {
         PImage fuelImage = loadImage("src\\main\\resources\\Tanks\\fuel.png");
         PImage windImage = loadImage("src\\main\\resources\\Tanks\\wind.png");
         GUI.setImages(fuelImage, windImage, CELLSIZE);
+        
          
         try {
             JSONObject config = (JSONObject) parser.parse(new FileReader("config.json"));
@@ -121,6 +126,10 @@ public class App extends PApplet {
         }
     }
 
+    public GUI getGUI(){
+        return GUI;
+    }
+
 	@Override
     
     public void keyPressed(KeyEvent event){
@@ -141,7 +150,11 @@ public class App extends PApplet {
             if(selectedTankIndex >= tanksNum){
                 selectedTankIndex=0;
             }
+            for (Tank tank : tanks) {
+                tank.setPlayerNum(selectedTankIndex);
+            }
             GUI.setCurrentPlayerIndex(selectedTankIndex);
+            System.out.println(selectedTankIndex);
         }else if (this.keyCode == 49) { 
             selectedTankIndex = 2; 
         } else if (this.keyCode == 50) {
@@ -149,6 +162,7 @@ public class App extends PApplet {
         } else if (this.keyCode == 35) {
             exit();
         } 
+        
     }
 
 	@Override
@@ -172,10 +186,16 @@ public class App extends PApplet {
     public void draw() {
         noStroke();
         image(backgroundImage, 0, 0, width, height);
-        LevelRenderer.renderLevel(this, levelLines, playerColors, terrainColor, treesImage, CELLSIZE);
+        LevelRenderer.renderLevel(this, levelLines, playerColors, terrainColor, treesImage, CELLSIZE, GUI);
         // levelRenderer.smoothTerrain();
         tanksNum = levelRenderer.tanksNum;
+        
+        if((tanksNum!= 0) && (numSet==false)){
+            GUI.playersSetup(tanksNum, playerColors);
+            numSet=true;
+        }
         GUI.displayGUIElements();
+
         
         //----------------------------------
         //display HUD:

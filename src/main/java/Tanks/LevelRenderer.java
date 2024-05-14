@@ -41,9 +41,11 @@ public class LevelRenderer {
     private static List<Integer> tankXArray = new ArrayList<>();
     private static List<Integer> tankYArray = new ArrayList<>();
 
+    private static GUI GUI;
+
     private static boolean finishedRendering = false;
     
-    public static void renderLevel(PApplet parent, String[] levelLines, int[] playerColors, int terrainColor, PImage treesImage, int CELLSIZE) {
+    public static void renderLevel(PApplet parent, String[] levelLines, int[] playerColors, int terrainColor, PImage treesImage, int CELLSIZE, GUI GUI) {
         terrainSmooth = new TerrainSmooth(parent, terrainColor, CELLSIZE, heights);
         if(!finishedRendering){
         for (int y = 0; y < levelLines.length; y++) {
@@ -83,7 +85,7 @@ public class LevelRenderer {
                 drawTrees(parent, treeXArray.get(i), treeYArray.get(i), CELLSIZE, treesImage);
             }
         }
-        renderAllTanks();
+        renderAllTanks(GUI);
     }
     // private boolean terrainSmoothed = false;
     // public static void smoothTerrain() {
@@ -122,7 +124,6 @@ private static void drawTerrain(PApplet parent, int terrainColor, int x, int y, 
         parent.rect(x1, y1*CELLSIZE, 1, (20-y1)*CELLSIZE);
         x1+=1;
     }
-    
 }
 
 private static void drawTrees(PApplet parent, int x, int y, int CELLSIZE, PImage treesImage) {
@@ -144,11 +145,16 @@ private static void drawTanks(PApplet parent, char c, int x, int y, int[] player
         tankIds.add(c);
     } 
 }
-public static void renderAllTanks() {
+public static void renderAllTanks(GUI GUI) {
+    int i=0;
     for (Tank tank : tanks) {
         // System.out.println(tank.getInfo());
+        i+=1;
+        tank.setGUI(GUI);
         tank.render(smoothedTerrainArray);
+        tank.renderGUI(i);
     }
+    i=0;
 }
 public static List<Tank> getTanks() {
     Collections.sort(tanks, Comparator.comparingInt(tank -> tank.getC() - 'A'));

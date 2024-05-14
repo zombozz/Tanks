@@ -25,6 +25,9 @@ public class Projectile {
     public int explosionInitialTime;
     private float gravity = 0.0f;
 
+    private float explosionX = 0;
+    private float explosionY = 0;
+
     public Projectile(PApplet parent, float x, float y, float power, int CELLSIZE, float rotationAngle, List<Float> smoothedTerrainArray) {
         this.parent = parent;
         this.x = x;
@@ -36,6 +39,13 @@ public class Projectile {
         isNull = false;
         initialTime = parent.millis();
     }
+    public float[] getExplosionCoords(){
+        return new float[]{explosionX, explosionY};
+    }
+    public void setExplosionCoords(float x, float y){
+        this.explosionX = x;
+        this.explosionY = y;
+    }
     public void doExplosion() {
         if(!didItExplode){
             explosionInitialTime = parent.millis();
@@ -43,8 +53,10 @@ public class Projectile {
         }
         if(parent.millis()-explosionInitialTime<201){
             Explosion explosion = new Explosion(parent, x, y, explosionInitialTime);
+            
             try {
                 explosion.Explode();
+                setExplosionCoords(x, y);
             } catch (NullPointerException e)  {
 
             }
