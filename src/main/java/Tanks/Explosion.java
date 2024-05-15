@@ -43,4 +43,13 @@ public class Explosion {
         }
         LevelRenderer.updateTerrainAfterExplosion(Math.round(x),Math.round(y));
     }
+    public float getX(){
+        return x;
+    }
+    public float getY(){
+        return y;
+    }
+    public int getExplosionInitialTime(){
+        return explosionInitialTime;
+    }
 }

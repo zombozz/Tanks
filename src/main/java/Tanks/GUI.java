@@ -6,23 +6,27 @@ public class GUI {
     private PApplet parent;
     private int screenWidth;
     private int screenHeight;
-    private int CELLSIZE;
-    private PImage fuelImage; 
-    private PImage windImage; 
-    private int currentPlayerIndex = 0;
+    public int CELLSIZE;
+    public int currentPlayerIndex = 0;
     private int paddingTop = 30;
+
+    public PImage fuelImage; 
+    public PImage windImage; 
+    public PImage parachuteImage; 
     
-    private int fuelAmount;
+    private int fuelAmount = 0;
     private int playerHealth = 100;
     private int playerPower = 50;
     private int playerScore = 0;
     private int windForce = 0;
+    private int parachutesRemaining = 3;
 
-    private int[] fuelAmounts;
-    private int[] playerHealths;
-    private int[] playerPowers;
-    private int[] playerScores;
-    private int[] playerWindForces;
+    public int[] fuelAmounts;
+    public int[] playerHealths;
+    public int[] playerPowers;
+    public int[] playerScores;
+    public int[] playerWindForces;
+    public int[] playerParachutes;
     
     private int numberOfPlayers = 0;
     private int[] playerColors;
@@ -38,9 +42,10 @@ public class GUI {
         displayBar();
         displayScoreboard();
         displayWind();
+        displayParachutesRemaining();
     }
 
-    public void setPlayerDetails(int fuelAmount, int playerHealth, int playerPower, int playerScore, int windForce){
+    public void setPlayerDetails(int fuelAmount, int playerHealth, int playerPower, int playerScore, int windForce, int parachutesRemaining){
         // System.out.println(playerWindForces[0]);
         if(numberOfPlayers>0){
             this.fuelAmounts[currentPlayerIndex] = fuelAmount;
@@ -48,6 +53,7 @@ public class GUI {
             this.playerPowers[currentPlayerIndex] = playerPower;
             this.playerScores[currentPlayerIndex] = playerScore;
             this.playerWindForces[currentPlayerIndex] = windForce;
+            this.playerParachutes[currentPlayerIndex] = parachutesRemaining;
             try{
             } catch (NullPointerException e){}
         }
@@ -71,8 +77,15 @@ public class GUI {
             parent.fill(playerColors[i]);
             parent.text("Player " + (char) (i+65), screenWidth-120, (paddingTop*2)+(16*(i+1)));
             parent.fill(0);
-            parent.text(playerScores[currentPlayerIndex], screenWidth-30, (paddingTop*2)+(16*(i+1)));
+            parent.text(playerScores[i], screenWidth-30, (paddingTop*2)+(16*(i+1)));
         }
+    }
+    public void displayParachutesRemaining(){
+        int parachuteX = 160;
+        parent.image(parachuteImage, parachuteX, 40, CELLSIZE-8, CELLSIZE-8);
+        parent.fill(0);
+        parent.textSize(15);
+        parent.text(playerParachutes[currentPlayerIndex], parachuteX+30, paddingTop*2);
     }
 
     public void displayBar(){
@@ -96,14 +109,11 @@ public class GUI {
     }
 
     public void displayFuel(){
-        // fuelAmount=250;
-        // this.fuelAmount = fuelAmount;
         int fuelX = 160;
         parent.image(fuelImage, fuelX, 10, CELLSIZE-8, CELLSIZE-8);
         parent.fill(0);
         parent.textSize(15);
         parent.text(fuelAmounts[currentPlayerIndex], fuelX+30, paddingTop);
-
     }
 
     public void displayWind(){
@@ -132,11 +142,13 @@ public class GUI {
         this.playerPowers = new int[numberOfPlayers];
         this.playerScores = new int[numberOfPlayers];
         this.playerWindForces = new int[numberOfPlayers];
+        this.playerParachutes = new int[numberOfPlayers];
     }
 
-    public void setImages(PImage fuelImage, PImage windImage, int CELLSIZE){
+    public void setImages(PImage fuelImage, PImage windImage, PImage parachuteImage, int CELLSIZE){
         this.fuelImage=fuelImage;
         this.windImage=windImage;
+        this.parachuteImage=parachuteImage;
         this.CELLSIZE=CELLSIZE;
     }
 }

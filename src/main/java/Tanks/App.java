@@ -22,9 +22,14 @@ import com.jogamp.opengl.util.packrect.Level;
 import java.io.*;
 import java.util.*;
 import java.util.List;
+import ddf.minim.*;
+import ddf.minim.spi.*;
+
+
 
 public class App extends PApplet {
-
+    Minim minim;
+    AudioPlayer player;
     public static int levelNo = 0;
 
 
@@ -44,16 +49,14 @@ public class App extends PApplet {
     public static final int BOARD_HEIGHT = 20;
 
     public static final int INITIAL_PARACHUTES = 1;
-
     public static final int FPS = 30;
-
     public String configPath;
-
     public static Random random = new Random();
-
     public static Timer timer;
-    
     private boolean numSet = false;
+    public static PImage parachuteImage;
+
+    private Powerups powerups;
 	
 	// Feel free to add any additional methods or attributes you want. Please put classes in different files.
 
@@ -86,6 +89,11 @@ public class App extends PApplet {
     int terrainColor;
 	@Override
     public void setup() {
+        minim = new Minim(this);
+        player = minim.loadFile("src\\main\\resources\\Tanks\\welcome-traveler.mp3");
+        player.play();
+        powerups = new Powerups();
+
         frameRate(FPS);
         levelRenderer = new LevelRenderer();
         JSONParser parser = new JSONParser();
@@ -94,7 +102,8 @@ public class App extends PApplet {
         GUI = new GUI(this);
         PImage fuelImage = loadImage("src\\main\\resources\\Tanks\\fuel.png");
         PImage windImage = loadImage("src\\main\\resources\\Tanks\\wind.png");
-        GUI.setImages(fuelImage, windImage, CELLSIZE);
+        parachuteImage = loadImage("src\\main\\resources\\Tanks\\parachute.png");
+        GUI.setImages(fuelImage, windImage, parachuteImage, CELLSIZE);
         
          
         try {
@@ -154,11 +163,14 @@ public class App extends PApplet {
                 tank.setPlayerNum(selectedTankIndex);
             }
             GUI.setCurrentPlayerIndex(selectedTankIndex);
-            System.out.println(selectedTankIndex);
         }else if (this.keyCode == 49) { 
             selectedTankIndex = 2; 
         } else if (this.keyCode == 50) {
             selectedTankIndex = 1;
+        } else if (this.keyCode == 82) { // R key
+            powerups.repairTank(tanks.get(selectedTankIndex));
+        } else if (this.keyCode == 70) { // F key
+            powerups.addFuel(tanks.get(selectedTankIndex));
         } else if (this.keyCode == 35) {
             exit();
         } 
@@ -167,7 +179,12 @@ public class App extends PApplet {
 
 	@Override
     public void keyReleased(){
-        
+        List<Tank> tanks = LevelRenderer.getTanks();
+        if (this.keyCode == 37) {//left
+            tanks.get(selectedTankIndex).stopTankMoveSound();
+        } else if (this.keyCode == 39) {//right
+            tanks.get(selectedTankIndex).stopTankMoveSound();
+        }
     }
 
     @Override

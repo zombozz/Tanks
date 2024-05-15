@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SoundEffects.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tanks_scaffold</a> &gt; <a href="index.source.html" class="el_package">Tanks</a> &gt; <span class="el_source">SoundEffects.java</span></div><h1>SoundEffects.java</h1><pre class="source lang-java linenums">package Tanks;
+import ddf.minim.*;
+import processing.core.PApplet;
+
+public class SoundEffects {
+    private Minim minim;
+    private AudioPlayer explosionSound;
+    private AudioPlayer popSound;
+    private AudioPlayer tankMoveSound;
+    private AudioPlayer turretSound;
+
+    private PApplet parent;
+    private int initialTime;
+
+<span class="fc" id="L15">    public SoundEffects(PApplet parent, Minim minim) {</span>
+<span class="fc" id="L16">        this.parent=parent;</span>
+<span class="fc" id="L17">        this.minim = minim;</span>
+<span class="fc" id="L18">        explosionSound = minim.loadFile(&quot;src\\main\\resources\\Tanks\\vine-boom.mp3&quot;);</span>
+<span class="fc" id="L19">        popSound = minim.loadFile(&quot;src\\main\\resources\\Tanks\\pop.mp3&quot;);</span>
+<span class="fc" id="L20">        tankMoveSound = minim.loadFile(&quot;src\\main\\resources\\Tanks\\tank.mp3&quot;);</span>
+<span class="fc" id="L21">        turretSound = minim.loadFile(&quot;src\\main\\resources\\Tanks\\turret.mp3&quot;);</span>
+<span class="fc" id="L22">        initialTime = parent.millis();</span>
+<span class="fc" id="L23">    }</span>
+    public void playExplosionSound() {
+        // explosionSound.rewind();
+        // explosionSound.play();
+<span class="nc" id="L27">    }</span>
+    public void playPopSound() {
+<span class="nc" id="L29">        popSound.rewind();</span>
+<span class="nc" id="L30">        popSound.play();</span>
+<span class="nc" id="L31">    }</span>
+    public void playTankMoveSound() {
+        // tankMoveSound.rewind();
+        // tankMoveSound.play();
+<span class="nc" id="L35">    }</span>
+    public void playTurretSound() {
+        // turretSound.rewind();
+        // turretSound.play();
+<span class="nc" id="L39">    }</span>
+    public void stopTankMoveSound() {
+        // tankMoveSound.pause();
+        // tankMoveSound.rewind();
+<span class="nc" id="L43">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

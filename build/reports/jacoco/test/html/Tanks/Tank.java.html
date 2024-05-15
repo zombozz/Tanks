@@ -2,8 +2,9 @@
 
 import java.util.ArrayList;
 import java.util.List;
-
+import ddf.minim.*;
 import processing.core.PApplet;
+import processing.core.PImage;
 
 public class Tank {
     private PApplet parent;
@@ -14,90 +15,176 @@ public class Tank {
     private int CELLSIZE;
     private List&lt;Float&gt; smoothedTerrainArray;
 
-<span class="fc" id="L17">    private int moveTankBy = 0;</span>
-<span class="fc" id="L18">    private int moveTurretBy = 0;</span>
-<span class="fc" id="L19">    private boolean turretShot = false;</span>
+<span class="fc" id="L18">    private int moveTankBy = 0;</span>
+<span class="fc" id="L19">    private int moveTurretBy = 0;</span>
 
     private Projectile projectile;
     private float rotationAngle;
 
     private float tankX;
     private float tankY;
+    private float previousTankX;
+    private float previousTankY;
     private float y1;
+    
+<span class="fc" id="L30">    private int playerFuel = 250;</span>
+<span class="fc" id="L31">    private int playerHealth = 100;</span>
+<span class="fc" id="L32">    private int playerPower = 50;</span>
+<span class="fc" id="L33">    private int playerScore = 0;</span>
+<span class="fc" id="L34">    private int windForce = (int) (Math.random() *(35+35) -35);</span>
+
+<span class="fc" id="L36">    private int playerNum = 0;</span>
+<span class="fc" id="L37">    private int i = 0;</span>
+<span class="fc" id="L38">    private boolean initialDetailsSetup = false;</span>
+    private GUI GUI;
+
+    private float[] explosionCoords;
+    private float[] oldExplosionCoords;
 
     private List&lt;Projectile&gt; projectiles;
 
-<span class="fc" id="L30">    public Tank(PApplet parent, char c, int[] colors, int x, float y, int size, List&lt;Float&gt; smoothedTerrainArray) {</span>
-<span class="fc" id="L31">        projectiles = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L32">        this.parent = parent;</span>
-<span class="fc" id="L33">        this.c = c;</span>
-<span class="fc" id="L34">        this.colors = colors;</span>
-<span class="fc" id="L35">        this.x = x;</span>
-<span class="fc" id="L36">        this.y = y;</span>
-<span class="fc" id="L37">        this.CELLSIZE = size;</span>
-<span class="fc" id="L38">        this.smoothedTerrainArray = smoothedTerrainArray;</span>
-<span class="fc" id="L39">    }</span>
+    private Minim minim;
+    private SoundEffects soundEffects;
 
-    public char getC(){
-<span class="nc" id="L42">        return c;</span>
-    }
-    public float getX(){
-<span class="fc" id="L45">        return tankX;</span>
-    }
-    public float getY(){
-<span class="nc" id="L48">        return tankY;</span>
-    }
+    private boolean isFalling;
+    private boolean moveTankCalled;
+<span class="fc" id="L51">    private PImage parachuteImage = App.parachuteImage;</span>
 
-    public void moveTank(int moveTank) {
-<span class="fc" id="L52">        this.moveTankBy+=moveTank;</span>
-<span class="fc" id="L53">        render(smoothedTerrainArray);</span>
-<span class="fc" id="L54">    }</span>
+<span class="fc" id="L53">    public Tank(PApplet parent, char c, int[] colors, int x, float y, int size, List&lt;Float&gt; smoothedTerrainArray) {</span>
+<span class="fc" id="L54">        projectiles = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L55">        this.parent = parent;</span>
+<span class="fc" id="L56">        this.c = c;</span>
+<span class="fc" id="L57">        this.colors = colors;</span>
+<span class="fc" id="L58">        this.x = x;</span>
+<span class="fc" id="L59">        this.y = y;</span>
+<span class="fc" id="L60">        this.CELLSIZE = size;</span>
+<span class="fc" id="L61">        this.smoothedTerrainArray = smoothedTerrainArray;</span>
+<span class="fc" id="L62">        minim = new Minim(parent);</span>
+<span class="fc" id="L63">        soundEffects = new SoundEffects(parent, minim);</span>
+<span class="fc" id="L64">    }</span>
+    public void setGUI(GUI GUI){
+<span class="fc" id="L66">        this.GUI=GUI;</span>
+<span class="fc" id="L67">    }</span>
+    public void checkDamage(){
+        
+        try{
+<span class="fc" id="L71">            oldExplosionCoords = explosionCoords;</span>
+<span class="nc" id="L72">            explosionCoords = projectile.getExplosionCoords();</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">            if(!(oldExplosionCoords[0]==explosionCoords[0])){</span>
 
-    public void moveTurret(int moveTurret) {
-<span class="nc" id="L57">        this.moveTurretBy+=moveTurret;</span>
-<span class="nc" id="L58">        render(smoothedTerrainArray);</span>
-<span class="nc" id="L59">    }</span>
+<span class="nc" id="L75">                float explosionX = explosionCoords[0];</span>
+<span class="nc" id="L76">                float explosionY = explosionCoords[1];</span>
+<span class="nc" id="L77">                float distanceSquared = (x - explosionX) * (x - explosionX) + (y - explosionY) * (y - explosionY);</span>
+<span class="nc" id="L78">                float distance = parent.sqrt(distanceSquared);</span>
+<span class="nc" id="L79">                int explosionRadius =30;</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">                 if (distance &lt;= explosionRadius) {</span>
+                // Calculate damage based on distance
+<span class="nc" id="L82">                float maxDamage = 60; // Maximum damage at 0 distance</span>
+<span class="nc" id="L83">                float damage = maxDamage * (1 - distance / explosionRadius);</span>
 
-    
-    public void shootTurret() {
-<span class="nc" id="L63">        float projectileSpeed = 2; // Set the speed of the projectile</span>
-<span class="nc" id="L64">        projectile = new Projectile(parent, tankX, tankY - 10, projectileSpeed, CELLSIZE, moveTurretBy);</span>
-<span class="nc" id="L65">        projectiles.add(projectile);</span>
-<span class="nc" id="L66">        System.out.println(projectiles);</span>
-<span class="nc" id="L67">    }</span>
-    
-    public void render(List&lt;Float&gt; smoothedTerrainArray) {
-<span class="fc" id="L70">        this.smoothedTerrainArray = smoothedTerrainArray;</span>
-<span class="fc" id="L71">        int xSize = (x*32) + moveTankBy;</span>
-<span class="pc bpc" id="L72" title="1 of 2 branches missed.">        if  (smoothedTerrainArray.size() &gt; xSize) {</span>
-<span class="nc" id="L73">            y1 = smoothedTerrainArray.get(xSize);</span>
-            // tank movement
-<span class="nc" id="L75">            int index = c - 'A'; </span>
-<span class="nc" id="L76">            tankX = x * CELLSIZE + moveTankBy;</span>
-<span class="nc" id="L77">            tankY = y1 * CELLSIZE;</span>
-            // tank shape
-<span class="nc" id="L79">            parent.fill(colors[index]);</span>
-<span class="nc" id="L80">            parent.ellipse(tankX, tankY, CELLSIZE, CELLSIZE/2);</span>
-<span class="nc" id="L81">            parent.ellipse(tankX, tankY-10, CELLSIZE/2, CELLSIZE/4);</span>
-<span class="nc" id="L82">            parent.fill(0);</span>
-            // turret movement
-<span class="nc" id="L84">            parent.pushMatrix();</span>
-<span class="nc" id="L85">            parent.translate(tankX, tankY-10);</span>
-<span class="nc" id="L86">            rotationAngle = PApplet.radians(moveTurretBy);</span>
-<span class="nc" id="L87">            parent.rotate(rotationAngle);</span>
-<span class="nc" id="L88">            parent.ellipse(0, -6, CELLSIZE/8, CELLSIZE/2);</span>
-<span class="nc" id="L89">            parent.popMatrix();</span>
-<span class="nc bnc" id="L90" title="All 2 branches missed.">            if (projectile != null) {</span>
-<span class="nc" id="L91">                projectile.update(); // Update the projectile's position</span>
-<span class="nc" id="L92">                projectile.display(); // Display the projectile</span>
-    
-                // Check if the projectile has gone off screen
-<span class="nc bnc" id="L95" title="All 2 branches missed.">                if (projectile.projectileLanded()) {</span>
-<span class="nc" id="L96">                    projectile = null; // Delete the projectile</span>
+                // Reduce player health based on damage
+<span class="nc" id="L86">                playerHealth -= damage;</span>
+                
+                // Ensure playerHealth doesn't go below zero
+<span class="nc bnc" id="L89" title="All 2 branches missed.">                if (playerHealth &lt; 0) {</span>
+<span class="nc" id="L90">                    playerHealth = 0;</span>
                 }
             }
+            }
+<span class="pc" id="L94">        } catch (NullPointerException e){}</span>
+<span class="fc" id="L95">    }</span>
+    public char getC(){
+<span class="fc" id="L97">        return c;</span>
+    }
+    public float getTankMovement(){
+<span class="nc" id="L100">        return moveTankBy;</span>
+    }
+    public float getY(){
+<span class="nc" id="L103">        return tankY;</span>
+    }
+    public void setPlayerNum(int playerNum){
+<span class="nc" id="L106">        this.playerNum = playerNum;</span>
+<span class="nc" id="L107">    }</span>
+
+    public void checkIfTankFall() {
+<span class="nc bnc" id="L110" title="All 6 branches missed.">        if (!moveTankCalled &amp;&amp; tankY &gt; previousTankY &amp;&amp; tankX == previousTankX) {</span>
+<span class="nc" id="L111">            isFalling = true;</span>
+            // parent.image(parachuteImage, tankX, tankY, 32, 32);
+        } else {
+<span class="nc" id="L114">            isFalling = false;</span>
         }
-<span class="fc" id="L100">    }</span>
+<span class="nc" id="L116">        previousTankX = tankX;</span>
+<span class="nc" id="L117">        previousTankY = tankY;</span>
+<span class="nc" id="L118">        moveTankCalled = false; </span>
+<span class="nc" id="L119">        parent.image(parachuteImage, tankX-16, tankY-40, 32, 32);</span>
+
+<span class="nc" id="L121">    }</span>
+
+    public void moveTank(int moveTank) {
+<span class="nc bnc" id="L124" title="All 2 branches missed.">        if(playerFuel&gt;0){</span>
+<span class="nc" id="L125">            soundEffects.playTankMoveSound();</span>
+<span class="nc" id="L126">            this.moveTankBy+=moveTank;</span>
+<span class="nc" id="L127">            this.playerFuel-=1;</span>
+        }
+<span class="nc" id="L129">        render(smoothedTerrainArray);</span>
+<span class="nc" id="L130">        moveTankCalled=true;</span>
+<span class="nc" id="L131">    }</span>
+    public void stopTankMoveSound(){
+<span class="nc" id="L133">        soundEffects.stopTankMoveSound();</span>
+<span class="nc" id="L134">    }</span>
+    public void moveTurret(int moveTurret) {
+<span class="nc" id="L136">        soundEffects.playTurretSound();</span>
+<span class="nc" id="L137">        this.moveTurretBy+=moveTurret;</span>
+<span class="nc" id="L138">        render(smoothedTerrainArray);</span>
+<span class="nc" id="L139">    }</span>
+
+    public void shootTurret() {
+<span class="nc" id="L142">        float projectileSpeed = 50; // Set the speed of the projectile</span>
+<span class="nc" id="L143">        projectile = new Projectile(parent, tankX, tankY - 10, projectileSpeed, CELLSIZE, moveTurretBy, smoothedTerrainArray,soundEffects);</span>
+<span class="nc" id="L144">        projectiles.add(projectile);</span>
+<span class="nc" id="L145">        windForce+=(int) (Math.random() *(10) -5);</span>
+<span class="nc" id="L146">    }</span>
+
+    public void renderGUI(int i){
+        // System.out.println(playerHealth);
+<span class="fc bfc" id="L150" title="All 2 branches covered.">        if(GUI.getCurrentPlayerIndex()+1 ==i){</span>
+<span class="fc" id="L151">            GUI.setPlayerDetails(playerFuel, playerHealth, playerPower, playerScore, windForce);</span>
+        }
+<span class="fc" id="L153">    }</span>
+    
+    public void render(List&lt;Float&gt; smoothedTerrainArray) {
+<span class="fc" id="L156">        checkDamage();</span>
+<span class="fc" id="L157">        this.smoothedTerrainArray = smoothedTerrainArray;</span>
+<span class="fc" id="L158">        int xSize = (x*32) + moveTankBy;</span>
+<span class="pc bpc" id="L159" title="1 of 2 branches missed.">        if  (smoothedTerrainArray.size() &gt; xSize) {</span>
+<span class="nc" id="L160">            y1 = smoothedTerrainArray.get(xSize);</span>
+            // tank movement
+<span class="nc" id="L162">            int index = c - 'A'; </span>
+<span class="nc" id="L163">            tankX = x * CELLSIZE + moveTankBy;</span>
+<span class="nc" id="L164">            tankY = y1 * CELLSIZE;</span>
+<span class="nc" id="L165">            checkIfTankFall();</span>
+            // tank shape
+<span class="nc" id="L167">            parent.fill(colors[index]);</span>
+<span class="nc" id="L168">            parent.ellipse(tankX, tankY, CELLSIZE, CELLSIZE/2);</span>
+<span class="nc" id="L169">            parent.ellipse(tankX, tankY-10, CELLSIZE/2, CELLSIZE/4);</span>
+<span class="nc" id="L170">            parent.fill(0);</span>
+            // turret movement
+<span class="nc" id="L172">            parent.pushMatrix();</span>
+<span class="nc" id="L173">            parent.translate(tankX, tankY-10);</span>
+<span class="nc" id="L174">            rotationAngle = PApplet.radians(moveTurretBy);</span>
+<span class="nc" id="L175">            parent.rotate(rotationAngle);</span>
+<span class="nc" id="L176">            parent.ellipse(0, -6, CELLSIZE/8, CELLSIZE/2);</span>
+<span class="nc" id="L177">            parent.popMatrix();</span>
+            try {
+<span class="nc bnc" id="L179" title="All 2 branches missed.">                if (!projectile.isNull) {</span>
+<span class="nc" id="L180">                    projectile.update(); </span>
+<span class="nc" id="L181">                    projectile.display();</span>
+                }
+<span class="nc" id="L183">            } catch (NullPointerException e)  {</span>
+
+<span class="nc" id="L185">            }</span>
+        }
+<span class="fc" id="L187">    }</span>
 
 
     // public String getInfo() {

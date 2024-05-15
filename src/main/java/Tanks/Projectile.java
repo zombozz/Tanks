@@ -5,30 +5,33 @@ import static processing.core.PApplet.cos;
 import static processing.core.PApplet.sin;
 
 import java.util.List;
-
+import ddf.minim.*;
 import com.jogamp.opengl.util.packrect.Level;
 
 public class Projectile {
-    private PApplet parent;
-    private float x;
-    private float y;
-    private float power;
-    private int CELLSIZE;
-    private float rotationAngle;
-    private int ScreenY= App.HEIGHT;
-    private int ScreenX = App.WIDTH;
-    private List<Float> smoothedTerrainArray;
+    public PApplet parent;
+    public float x;
+    public float y;
+    public float power;
+    public int CELLSIZE;
+    public float rotationAngle;
+    public int ScreenY= App.HEIGHT;
+    public int ScreenX = App.WIDTH;
+    public List<Float> smoothedTerrainArray;
     public float initialTime;
-    private float y1;
+    public float y1;
     public boolean isNull = false;
-    private boolean didItExplode = false;
+    public boolean didItExplode = false;
     public int explosionInitialTime;
-    private float gravity = 0.0f;
+    public float gravity = 0.0f;
 
-    private float explosionX = 0;
-    private float explosionY = 0;
+    public SoundEffects soundEffects;
 
-    public Projectile(PApplet parent, float x, float y, float power, int CELLSIZE, float rotationAngle, List<Float> smoothedTerrainArray) {
+    public float explosionX = 0;
+    public float explosionY = 0;
+
+    public Projectile(PApplet parent, float x, float y, float power, int CELLSIZE, float rotationAngle, List<Float> smoothedTerrainArray, SoundEffects soundEffects) {
+        this.soundEffects = soundEffects;
         this.parent = parent;
         this.x = x;
         this.y = y;
@@ -38,6 +41,7 @@ public class Projectile {
         this.smoothedTerrainArray = smoothedTerrainArray;
         isNull = false;
         initialTime = parent.millis();
+        soundEffects.playPopSound();
     }
     public float[] getExplosionCoords(){
         return new float[]{explosionX, explosionY};
@@ -47,6 +51,7 @@ public class Projectile {
         this.explosionY = y;
     }
     public void doExplosion() {
+        soundEffects.playExplosionSound();
         if(!didItExplode){
             explosionInitialTime = parent.millis();
             didItExplode = true;

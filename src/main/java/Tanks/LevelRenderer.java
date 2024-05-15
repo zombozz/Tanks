@@ -23,10 +23,10 @@ import java.io.*;
 import java.util.*;
 
 public class LevelRenderer {
-    private static Map<Integer, Integer> heights = new HashMap<>();
+    public static Map<Integer, Integer> heights = new HashMap<>();
     private static TerrainSmooth terrainSmooth;
     public static List<Float> smoothedTerrainArray = new ArrayList<>();
-    private static List<Tank> tanks = new ArrayList<>();
+    public static List<Tank> tanks = new ArrayList<>();
     private static float yCoord;
     private static int xSize;
     private static int moveBy;
@@ -41,9 +41,9 @@ public class LevelRenderer {
     private static List<Integer> tankXArray = new ArrayList<>();
     private static List<Integer> tankYArray = new ArrayList<>();
 
-    private static GUI GUI;
+    public static GUI GUI;
 
-    private static boolean finishedRendering = false;
+    public static boolean finishedRendering = false;
     
     public static void renderLevel(PApplet parent, String[] levelLines, int[] playerColors, int terrainColor, PImage treesImage, int CELLSIZE, GUI GUI) {
         terrainSmooth = new TerrainSmooth(parent, terrainColor, CELLSIZE, heights);
@@ -67,7 +67,7 @@ public class LevelRenderer {
                     case ' ':
                         break;
                     default:
-                        drawTanks(parent, c, x, y, playerColors, CELLSIZE, smoothedTerrainArray);
+                        drawTanks(parent, c, x, y, playerColors, CELLSIZE, smoothedTerrainArray, GUI);
                         break;
                 }
             }
@@ -135,12 +135,12 @@ private static void drawTrees(PApplet parent, int x, int y, int CELLSIZE, PImage
     } 
 }
 
-private static void drawTanks(PApplet parent, char c, int x, int y, int[] playerColors, int CELLSIZE, List<Float> smoothedTerrainArray) {
+private static void drawTanks(PApplet parent, char c, int x, int y, int[] playerColors, int CELLSIZE, List<Float> smoothedTerrainArray, GUI GUI) {
     if (tanks.size() < 5 && !tankIds.contains(c) && c >= 'A' && c <= 'E') {
         tanksNum+=1;
         // System.out.println(tanks);
         // System.out.println(tankIds);
-        Tank tank = new Tank(parent, c, playerColors, x, y, CELLSIZE, smoothedTerrainArray);
+        Tank tank = new Tank(parent, c, playerColors, x, y, CELLSIZE, smoothedTerrainArray, GUI);
         tanks.add(tank);
         tankIds.add(c);
     } 
@@ -150,7 +150,7 @@ public static void renderAllTanks(GUI GUI) {
     for (Tank tank : tanks) {
         // System.out.println(tank.getInfo());
         i+=1;
-        tank.setGUI(GUI);
+        // tank.setGUI(GUI);
         tank.render(smoothedTerrainArray);
         tank.renderGUI(i);
     }
