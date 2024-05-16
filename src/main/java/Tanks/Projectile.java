@@ -24,13 +24,14 @@ public class Projectile {
     public boolean didItExplode = false;
     public int explosionInitialTime;
     public float gravity = 0.0f;
+    public int windForce;
 
     public SoundEffects soundEffects;
 
     public float explosionX = 0;
     public float explosionY = 0;
 
-    public Projectile(PApplet parent, float x, float y, float power, int CELLSIZE, float rotationAngle, List<Float> smoothedTerrainArray, SoundEffects soundEffects) {
+    public Projectile(PApplet parent, float x, float y, float power, int CELLSIZE, float rotationAngle, List<Float> smoothedTerrainArray, SoundEffects soundEffects, int windForce) {
         this.soundEffects = soundEffects;
         this.parent = parent;
         this.x = x;
@@ -39,6 +40,8 @@ public class Projectile {
         this.rotationAngle = rotationAngle - 90;
         this.CELLSIZE = CELLSIZE;
         this.smoothedTerrainArray = smoothedTerrainArray;
+        this.windForce = windForce; 
+
         isNull = false;
         initialTime = parent.millis();
         soundEffects.playPopSound();
@@ -82,6 +85,7 @@ public class Projectile {
                     doExplosion();
                 } else {
                     gravity+=0.072;
+                    x+=windForce*0.03;
                     //do trajectory
                     y += gravity*power/10;
                     x += vx; // Update x position

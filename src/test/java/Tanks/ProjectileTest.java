@@ -20,7 +20,7 @@ public class ProjectileTest {
         int CELLSIZE = 10;
         float rotationAngle = 45;
         
-        Projectile projectile = new Projectile(mockApplet, x, y, power, CELLSIZE, rotationAngle, terrainArray, soundEffects);
+        Projectile projectile = new Projectile(mockApplet, x, y, power, CELLSIZE, rotationAngle, terrainArray, soundEffects, 0);
 
         assertEquals(x, projectile.x);
         assertEquals(y, projectile.y);
@@ -42,7 +42,7 @@ public class ProjectileTest {
         int CELLSIZE = 10;
         float rotationAngle = 45;
         
-        Projectile projectile = new Projectile(mockApplet, x, y, power, CELLSIZE, rotationAngle, terrainArray, soundEffects);
+        Projectile projectile = new Projectile(mockApplet, x, y, power, CELLSIZE, rotationAngle, terrainArray, soundEffects, 0);
 
         float initialY = projectile.y;
         projectile.update();
@@ -60,7 +60,7 @@ public class ProjectileTest {
         int CELLSIZE = 10;
         float rotationAngle = 45;
         
-        Projectile projectile = new Projectile(mockApplet, x, y, power, CELLSIZE, rotationAngle, terrainArray, soundEffects);
+        Projectile projectile = new Projectile(mockApplet, x, y, power, CELLSIZE, rotationAngle, terrainArray, soundEffects, 0);
 
         projectile.display(); // Just test if it runs without errors
         // You can add more assertions here to check if the display behavior is as expected
@@ -76,9 +76,8 @@ public class ProjectileTest {
         int CELLSIZE = 10;
         float rotationAngle = 45;
         
-        Projectile projectile = new Projectile(mockApplet, x, y, power, CELLSIZE, rotationAngle, terrainArray, soundEffects);
+        Projectile projectile = new Projectile(mockApplet, x, y, power, CELLSIZE, rotationAngle, terrainArray, soundEffects, 0);
 
-        projectile.doExplosion(); // Just test if it runs without errors
-        // You can add more assertions here to check if the explosion behavior is as expected
+        projectile.doExplosion();
     }
 }

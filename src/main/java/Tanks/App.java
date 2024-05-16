@@ -38,8 +38,8 @@ public class App extends PApplet {
     public static final int CELLSIZE = 32; //8;
     public static final int CELLHEIGHT = 32;
     private Tank tank;
-    private static int tanksNum;
-    private static int selectedTankIndex = 0;
+    public static int tanksNum;
+    public static int selectedTankIndex = 0;
 
     public static final int CELLAVG = 32;
     public static final int TOPBAR = 0;
@@ -54,58 +54,57 @@ public class App extends PApplet {
     public static Random random = new Random();
     public static Timer timer;
     private boolean numSet = false;
+
     public static PImage parachuteImage;
+    public static PImage arrowImage;
+    private boolean firstTankDrawn=false;
 
     private Powerups powerups;
+
+    private boolean settingUp = true;
 	
-	// Feel free to add any additional methods or attributes you want. Please put classes in different files.
+    private List<Tank> tanks = LevelRenderer.getTanks();
 
     public App() {
         this.configPath = "config.json";
     }
-
-    /**
-     * Initialise the setting of the window size.
-     */
 	@Override
     public void settings() {
         size(WIDTH, HEIGHT);
     }
 
-    /**
-     * Load all resources such as images. Initialise the elements such as the player and map elements.
-     */
     PImage backgroundImage;
     PImage treesImage;
     String[] levelLines;
     int[] playerColors = {
-        color(0, 0, 255),   // Blue for player A
-        color(255, 0, 0),   // Red for player B
-        color(0, 255, 255),   // Aqua for player C
-        color(255, 255, 0),   // Yellow for player D
-        color(0, 255, 0),   // Green for player E
-        // Add more colors for other players if needed
+        color(0, 0, 255),  
+        color(255, 0, 0), 
+        color(0, 255, 255),  
+        color(255, 255, 0), 
+        color(0, 255, 0),
     };
     int terrainColor;
 	@Override
     public void setup() {
-        minim = new Minim(this);
-        player = minim.loadFile("src\\main\\resources\\Tanks\\welcome-traveler.mp3");
-        player.play();
+        settingUp=true;
         powerups = new Powerups();
-
-        frameRate(FPS);
-        levelRenderer = new LevelRenderer();
+        // levelRenderer = new LevelRenderer;
+        // System.out.println(levelRenderer.heights);
         JSONParser parser = new JSONParser();
-        timer = new Timer(this, this.millis());
-
         GUI = new GUI(this);
+        timer = new Timer(this, this.millis());
+        minim = new Minim(this);
+        // player = minim.loadFile("src\\main\\resources\\Tanks\\welcome-traveler.mp3");
+        // player.play();
+        
+        frameRate(FPS);
+
         PImage fuelImage = loadImage("src\\main\\resources\\Tanks\\fuel.png");
         PImage windImage = loadImage("src\\main\\resources\\Tanks\\wind.png");
         parachuteImage = loadImage("src\\main\\resources\\Tanks\\parachute.png");
+        arrowImage = loadImage("src\\main\\resources\\Tanks\\arrow.png");
+
         GUI.setImages(fuelImage, windImage, parachuteImage, CELLSIZE);
-        
-         
         try {
             JSONObject config = (JSONObject) parser.parse(new FileReader("config.json"));
             JSONArray levels = (JSONArray) config.get("levels");
@@ -126,13 +125,66 @@ public class App extends PApplet {
                 String treesFilename = (String) level1.get("trees");
                 treesImage = loadImage("src\\main\\resources\\Tanks\\"+treesFilename);
             } else {
-                treesImage = loadImage("src\\main\\resources\\Tanks\\fuel.png");
+                treesImage = null;
             }
-
             backgroundImage = loadImage("src\\main\\resources\\Tanks\\"+backgroundFilename);
+            
         } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
+        levelRenderer = new LevelRenderer(this, levelLines, playerColors, terrainColor, treesImage, CELLSIZE, GUI);
+        System.out.println(levelLines[9]);
+        settingUp=false;
+    }
+
+    private void loadLevel() {
+        settingUp=true;
+        powerups = new Powerups();
+        JSONParser parser = new JSONParser();
+        GUI = new GUI(this);
+        timer = new Timer(this, this.millis());
+        minim = new Minim(this);
+        
+        frameRate(FPS);
+
+        PImage fuelImage = loadImage("src\\main\\resources\\Tanks\\fuel.png");
+        PImage windImage = loadImage("src\\main\\resources\\Tanks\\wind.png");
+        parachuteImage = loadImage("src\\main\\resources\\Tanks\\parachute.png");
+        arrowImage = loadImage("src\\main\\resources\\Tanks\\arrow.png");
+
+        GUI.setImages(fuelImage, windImage, parachuteImage, CELLSIZE);
+        try {
+            JSONObject config = (JSONObject) parser.parse(new FileReader("config.json"));
+            JSONArray levels = (JSONArray) config.get("levels");
+            JSONObject level1 = (JSONObject) levels.get(levelNo);
+
+            String layoutFilename = (String) level1.get("layout");
+            levelLines = loadStrings(layoutFilename);
+
+            String backgroundFilename = (String) level1.get("background");
+            String foregroundColour = (String) level1.get("foreground-colour");
+            String[] components = foregroundColour.split(",");
+            int r = Integer.parseInt(components[0]);
+            int g = Integer.parseInt(components[1]);
+            int b = Integer.parseInt(components[2]);
+            terrainColor = color(r, g, b);
+
+            if (level1.containsKey("trees")) {
+                String treesFilename = (String) level1.get("trees");
+                treesImage = loadImage("src\\main\\resources\\Tanks\\"+treesFilename);
+            } else {
+                treesImage = null;
+            }
+            backgroundImage = loadImage("src\\main\\resources\\Tanks\\"+backgroundFilename);
+            
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
+        }
+        levelRenderer = new LevelRenderer(this, levelLines, playerColors, terrainColor, treesImage, CELLSIZE, GUI);
+        System.out.println(levelLines[9]);
+        levelRenderer.reset();
+        levelRenderer.renderLevel();
+        settingUp=false;
     }
 
     public GUI getGUI(){
@@ -142,51 +194,109 @@ public class App extends PApplet {
 	@Override
     
     public void keyPressed(KeyEvent event){
-        List<Tank> tanks = LevelRenderer.getTanks();
         if (this.keyCode == 37) {//left
+            // System.out.println(tanks.get(selectedTankIndex));
             tanks.get(selectedTankIndex).moveTank(-1);
         } else if (this.keyCode == 39) {//right
             tanks.get(selectedTankIndex).moveTank(1);
         } else if (this.keyCode == 38) {//up
             tanks.get(selectedTankIndex).moveTurret(-6);
-            
         } else if (this.keyCode == 40) {//down
             tanks.get(selectedTankIndex).moveTurret(6);
-            
         }else if (this.keyCode == 32) { 
             tanks.get(selectedTankIndex).shootTurret();
-            selectedTankIndex += 1;
-            if(selectedTankIndex >= tanksNum){
-                selectedTankIndex=0;
-            }
-            for (Tank tank : tanks) {
-                tank.setPlayerNum(selectedTankIndex);
-            }
-            GUI.setCurrentPlayerIndex(selectedTankIndex);
-        }else if (this.keyCode == 49) { 
-            selectedTankIndex = 2; 
-        } else if (this.keyCode == 50) {
-            selectedTankIndex = 1;
+            nextTank();
+            // System.out.println(selectedTankIndex);
         } else if (this.keyCode == 82) { // R key
             powerups.repairTank(tanks.get(selectedTankIndex));
         } else if (this.keyCode == 70) { // F key
             powerups.addFuel(tanks.get(selectedTankIndex));
         } else if (this.keyCode == 35) {
             exit();
+        } else if (this.keyCode == 81) {
+            nextLevel();
+        } else if (this.keyCode == 9) {
+            loadLevel();
         } 
-        
+    }
+    public void nextTank(){
+        selectedTankIndex+=1;
+        // System.out.println(tanksNum);
+        if(selectedTankIndex >= tanksNum){
+            selectedTankIndex=0;
+        }
+        for (Tank tank : tanks) {
+            tank.setPlayerNum(selectedTankIndex);
+        }
+        GUI.setCurrentPlayerIndex(selectedTankIndex);
+        tanks.get(selectedTankIndex).drawTankArrow(arrowImage);
+    }
+    public void checkTanksRemaining(){
+        int i = 0;
+        for (Tank tank : tanks) {
+            if(!tank.tankAlive) {
+                i+=1;
+            }
+        }
+        if(i==tanksNum-1){
+            nextLevel();
+        }
     }
 
+    public void nextLevel(){
+        levelNo+=1;
+        for (Tank tank : tanks) {
+            tank.tankAlive=true;
+        }
+        // setup();
+        loadLevel();
+    }
+    
 	@Override
     public void keyReleased(){
-        List<Tank> tanks = LevelRenderer.getTanks();
         if (this.keyCode == 37) {//left
             tanks.get(selectedTankIndex).stopTankMoveSound();
         } else if (this.keyCode == 39) {//right
             tanks.get(selectedTankIndex).stopTankMoveSound();
         }
     }
-
+	@Override
+    public void draw() {
+        if(!settingUp){
+            List<Tank> tanks = levelRenderer.getTanks();
+            noStroke();
+            image(backgroundImage, 0, 0, width, height);
+            levelRenderer.renderLevel();
+            tanksNum = levelRenderer.tanksNum;
+            
+            if((tanksNum!= 0) && (numSet==false)){
+                GUI.playersSetup(tanksNum, playerColors);
+                numSet=true;
+            }
+            try{
+                GUI.displayGUIElements();
+            } catch (NullPointerException e){}
+            
+            if(timer.finishedRendering() && !firstTankDrawn){
+                tanks.get(0).drawTankArrow(arrowImage);
+                firstTankDrawn = true;
+            }
+            try{
+                if(!tanks.get(selectedTankIndex).tankAlive){
+                    nextTank();
+                }
+            } catch (IndexOutOfBoundsException e){}
+            checkTanksRemaining();
+        } else{
+            System.out.println("SETTING UPngUp");
+        }
+    }
+        
+        
+    public static void main(String[] args) {
+        PApplet.main("Tanks.App");
+    }
+    
     @Override
     public void mousePressed(MouseEvent e) {
         //TODO - powerups, like repair and extra fuel and teleport
@@ -198,41 +308,6 @@ public class App extends PApplet {
     public void mouseReleased(MouseEvent e) {
 
     }
-    
-	@Override
-    public void draw() {
-        noStroke();
-        image(backgroundImage, 0, 0, width, height);
-        LevelRenderer.renderLevel(this, levelLines, playerColors, terrainColor, treesImage, CELLSIZE, GUI);
-        // levelRenderer.smoothTerrain();
-        tanksNum = levelRenderer.tanksNum;
         
-        if((tanksNum!= 0) && (numSet==false)){
-            GUI.playersSetup(tanksNum, playerColors);
-            numSet=true;
-        }
-        GUI.displayGUIElements();
-
-        
-        //----------------------------------
-        //display HUD:
-        //----------------------------------
-        //TODO
-
-        //----------------------------------
-        //display scoreboard:
-        //----------------------------------
-        //TODO
-        
-		//----------------------------------
-        //----------------------------------
-
-        //TODO: Check user action
-    }
-
-
-    public static void main(String[] args) {
-        PApplet.main("Tanks.App");
-    }
-
 }
+    

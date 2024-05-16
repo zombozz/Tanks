@@ -53,6 +53,12 @@ public class Tank {
 
     private boolean tankFalling = false;
 
+    private boolean drawArrow = false;
+    private int arrowStartTime = 0;
+    private PImage arrowImage;
+    
+    public boolean tankAlive = true;
+
     public Tank(PApplet parent, char c, int[] colors, int x, float y, int size, List<Float> smoothedTerrainArray, GUI GUI) {
         projectiles = new ArrayList<>();
         this.parent = parent;
@@ -96,7 +102,6 @@ public class Tank {
             parachuteStartTime = parent.millis();
         }
         if (parachuteActive) {
-            System.out.println(tankFalling);
             tankFalling=true;
             parent.image(parachuteImage, tankX - 16, tankY - 40, 32, 32);
             if (parent.millis() - parachuteStartTime > 50) {
@@ -108,17 +113,30 @@ public class Tank {
         previousTankY = tankY;
     }
 
-    public void moveTank(int moveTank) {
-        if(playerFuel>0){
+    public void moveTank(int moveTankBy) {
+        if(tankAlive && playerFuel>0 && !(tankX+moveTankBy < 0)){
             soundEffects.playTankMoveSound();
-            this.moveTankBy+=moveTank;
+            this.moveTankBy+=moveTankBy;
             this.playerFuel-=1;
+        }else if (tankAlive){
+            explodeTank();
         }
         render(smoothedTerrainArray);
     }
 
     public void stopTankMoveSound(){
         soundEffects.stopTankMoveSound();
+    }
+
+    public void explodeTank(){
+        int explosionInitialTime = parent.millis();
+        Explosion explosion = new Explosion(parent, tankX, tankY, explosionInitialTime);
+        explosion.Explode();
+        tankAlive = false;
+    }
+
+    public int tankReset(){
+        return playerScore;
     }
 
     public void moveTurret(int moveTurret) {
@@ -129,7 +147,7 @@ public class Tank {
 
     public void shootTurret() {
         float projectileSpeed = playerPower; // Set the speed of the projectile
-        projectile = new Projectile(parent, tankX, tankY - 10, projectileSpeed, CELLSIZE, moveTurretBy, smoothedTerrainArray,soundEffects);
+        projectile = new Projectile(parent, tankX, tankY - 10, projectileSpeed, CELLSIZE, moveTurretBy, smoothedTerrainArray,soundEffects, windForce);
         projectiles.add(projectile);
         windForce+=(int) (Math.random() *(10) -5);
     }
@@ -141,6 +159,7 @@ public class Tank {
     }
     
     public void render(List<Float> smoothedTerrainArray) {
+        if(tankAlive){
         checkDamage();
         this.smoothedTerrainArray = smoothedTerrainArray;
         int xSize = (x*32) + moveTankBy;
@@ -176,7 +195,16 @@ public class Tank {
             } catch (NullPointerException e)  {
 
             }
+
+            if (drawArrow) {
+                if (parent.millis() - arrowStartTime < 2000) {
+                    parent.image(arrowImage, tankX - 16, tankY - 50, 32, 32);
+                } else {
+                    drawArrow = false;
+                }
+            }
         }
+    } 
     }
     public char getC(){
         return c;
@@ -190,9 +218,15 @@ public class Tank {
     public void setPlayerNum(int playerNum){
         this.playerNum = playerNum;
     }
-    // public String getInfo() {
-    //     String bruh = Integer.toString(c) + "  "+ Integer.toString(x) +  "  "+ Float.toString(y);
-    //     return bruh;
-    // }
+
+    public void drawTankArrow(PImage arrowImage){
+        this.arrowImage = arrowImage;
+        drawArrow = true;
+        arrowStartTime = parent.millis();
+    }
+    public String getInfo() {
+        String bruh = c + "  "+ Integer.toString(x) +  "  "+ Float.toString(y);
+        return bruh;
+    }
 }
 

@@ -119,11 +119,22 @@ public class GUI {
     public void displayWind(){
         int windPower = 200;
         int windX = screenWidth-100;
-        parent.image(windImage, windX, 5, CELLSIZE+8, CELLSIZE+8);
+        int windY = 5;
+
         parent.fill(0);
         parent.textSize(15);
         try{
             parent.text(playerWindForces[currentPlayerIndex], windX+50, paddingTop);
+            if(playerWindForces[currentPlayerIndex] > 0){
+                parent.image(windImage, windX, 5, CELLSIZE+8, CELLSIZE+8);
+            } else {
+                parent.pushMatrix();
+                parent.translate(windX + CELLSIZE / 2, windY + CELLSIZE / 2);
+                parent.rotate(PApplet.PI);
+                parent.translate(-windX - CELLSIZE / 2, -windY - CELLSIZE / 2);
+                parent.image(windImage, windX-8, windY-8, CELLSIZE + 8, CELLSIZE + 8);
+                parent.popMatrix();
+            }
         } catch(NullPointerException e) {
                 
         }

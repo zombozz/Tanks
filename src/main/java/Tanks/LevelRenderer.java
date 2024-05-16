@@ -24,7 +24,7 @@ import java.util.*;
 
 public class LevelRenderer {
     public static Map<Integer, Integer> heights = new HashMap<>();
-    private static TerrainSmooth terrainSmooth;
+    // private static TerrainSmooth terrainSmooth;
     public static List<Float> smoothedTerrainArray = new ArrayList<>();
     public static List<Tank> tanks = new ArrayList<>();
     private static float yCoord;
@@ -41,14 +41,40 @@ public class LevelRenderer {
     private static List<Integer> tankXArray = new ArrayList<>();
     private static List<Integer> tankYArray = new ArrayList<>();
 
-    public static GUI GUI;
-
     public static boolean finishedRendering = false;
-    
-    public static void renderLevel(PApplet parent, String[] levelLines, int[] playerColors, int terrainColor, PImage treesImage, int CELLSIZE, GUI GUI) {
-        terrainSmooth = new TerrainSmooth(parent, terrainColor, CELLSIZE, heights);
+
+    private PApplet parent;
+    public String[] levelLines;
+    private int[] playerColors;
+    private int terrainColor;
+    private PImage treesImage;
+    private int CELLSIZE;
+    private GUI GUI;
+
+    public LevelRenderer(PApplet parent, String[] levelLines, int[] playerColors, int terrainColor, PImage treesImage, int CELLSIZE, GUI GUI) {
+        this.parent=parent;
+        this.levelLines=levelLines;
+        this.playerColors=playerColors;
+        this.terrainColor=terrainColor;
+        this.treesImage=treesImage;
+        this.CELLSIZE=CELLSIZE;
+        this.GUI=GUI;
+    }
+
+    private TerrainSmooth terrainSmooth = new TerrainSmooth(parent, terrainColor, CELLSIZE, heights);
+
+    public void reset(){
+        finishedRendering=false;
+        tanks = new ArrayList<>();
+        tanksNum=0;
+        tanks = new ArrayList<>();
+        tankIds = new HashSet<>();
+    }
+
+    public void renderLevel() {
+        
         if(!finishedRendering){
-        for (int y = 0; y < levelLines.length; y++) {
+            for (int y = 0; y < levelLines.length; y++) {
             String line = levelLines[y];
             for (int x = 0; x < line.length(); x++) {
                 char c = line.charAt(x);
@@ -56,8 +82,6 @@ public class LevelRenderer {
                     case 'X':
                         heights.put(x, y);
                         drawTerrain(parent, terrainColor, x, y, CELLSIZE);
-                        // parent.fill(terrainColor);
-                        // parent.rect(x * CELLSIZE, y * CELLSIZE, CELLSIZE, (20-y)*CELLSIZE);
                         break;
                     case 'T':
                         treeXArray.add(x);
@@ -94,7 +118,6 @@ public class LevelRenderer {
     // }
 
     public static void updateTerrainAfterExplosion(int explosionX, int explosionY) {
-        // Update heights map based on the explosion coordinates
         int xRange = 0;
         boolean middleReached = false;
         for (int x = explosionX - 30; x <= explosionX + 30; x++) {
@@ -131,15 +154,15 @@ private static void drawTrees(PApplet parent, int x, int y, int CELLSIZE, PImage
     if (smoothedTerrainArray.size() > xSize) {
         Float y1 = smoothedTerrainArray.get(xSize);
         yCoord = y1 * CELLSIZE + 2;
-        parent.image(treesImage, x * CELLSIZE, yCoord-CELLSIZE, CELLSIZE, CELLSIZE);
+        if(treesImage!=null){
+            parent.image(treesImage, x * CELLSIZE, yCoord-CELLSIZE, CELLSIZE, CELLSIZE);
+        }
     } 
 }
 
 private static void drawTanks(PApplet parent, char c, int x, int y, int[] playerColors, int CELLSIZE, List<Float> smoothedTerrainArray, GUI GUI) {
     if (tanks.size() < 5 && !tankIds.contains(c) && c >= 'A' && c <= 'E') {
         tanksNum+=1;
-        // System.out.println(tanks);
-        // System.out.println(tankIds);
         Tank tank = new Tank(parent, c, playerColors, x, y, CELLSIZE, smoothedTerrainArray, GUI);
         tanks.add(tank);
         tankIds.add(c);
@@ -148,11 +171,13 @@ private static void drawTanks(PApplet parent, char c, int x, int y, int[] player
 public static void renderAllTanks(GUI GUI) {
     int i=0;
     for (Tank tank : tanks) {
-        // System.out.println(tank.getInfo());
+        System.out.println(tank.getInfo());
         i+=1;
         // tank.setGUI(GUI);
-        tank.render(smoothedTerrainArray);
-        tank.renderGUI(i);
+        if(tank.tankAlive) {
+            tank.render(smoothedTerrainArray);
+            tank.renderGUI(i);
+        }
     }
     i=0;
 }
