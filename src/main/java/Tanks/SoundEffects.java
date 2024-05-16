@@ -8,6 +8,8 @@ public class SoundEffects {
     private AudioPlayer popSound;
     private AudioPlayer tankMoveSound;
     private AudioPlayer turretSound;
+    private AudioPlayer nextLevelSound;
+    private AudioPlayer gameOverSound;
 
     private PApplet parent;
     private int initialTime;
@@ -19,6 +21,8 @@ public class SoundEffects {
         popSound = minim.loadFile("src\\main\\resources\\Tanks\\pop.mp3");
         tankMoveSound = minim.loadFile("src\\main\\resources\\Tanks\\tank.mp3");
         turretSound = minim.loadFile("src\\main\\resources\\Tanks\\turret.mp3");
+        nextLevelSound = minim.loadFile("src\\main\\resources\\Tanks\\whoosh.mp3");
+        gameOverSound = minim.loadFile("src\\main\\resources\\Tanks\\game-over3.mp3");
         initialTime = parent.millis();
     }
     public void playExplosionSound() {
@@ -40,5 +44,13 @@ public class SoundEffects {
     public void stopTankMoveSound() {
         tankMoveSound.pause();
         tankMoveSound.rewind();
+    }
+    public void playNextLevelSound() {
+        nextLevelSound.rewind();
+        nextLevelSound.play();
+    }
+    public void playGameOverSound() {
+        gameOverSound.rewind();
+        // gameOverSound.play();
     }
 }

@@ -156,6 +156,7 @@ public class Tank {
     }
 
     public void moveTank(int moveTankBy) {
+        
         if(tankAlive && (tankX+moveTankBy > 0) && (tankX+moveTankBy < App.WIDTH)) {
             if(playerFuel>0){
                 soundEffects.playTankMoveSound();

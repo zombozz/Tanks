@@ -28,10 +28,9 @@ import ddf.minim.spi.*;
 
 
 public class App extends PApplet {
-    Minim minim;
+    
     AudioPlayer player;
     public static int levelNo = 0;
-
 
     public static GUI GUI;
     LevelRenderer levelRenderer;
@@ -71,6 +70,9 @@ public class App extends PApplet {
     private Gameover gameover;
     private boolean isGameover = false;
 
+    private Minim minim;
+    private SoundEffects soundEffects;
+
     public App() {
         this.configPath = "config.json";
     }
@@ -92,6 +94,8 @@ public class App extends PApplet {
     int terrainColor;
 	@Override
     public void setup() {
+        minim = new Minim(this);
+        soundEffects = new SoundEffects(this, minim);
         settingUp=true;
         powerups = new Powerups();
         JSONParser parser = new JSONParser();
@@ -261,12 +265,14 @@ public class App extends PApplet {
                 tank.tankAlive=true;
             }
             loadLevel();
+            soundEffects.playNextLevelSound();
             numSet=false;
         } catch (IndexOutOfBoundsException e) {
             settingUp = true;
             tankScores = levelRenderer.getTankScores();
             isGameover = true;
             if(isGameover) {
+                soundEffects.playGameOverSound();
                 gameover = new Gameover(this, tankScores);
             }
         }

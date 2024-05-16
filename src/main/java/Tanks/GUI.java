@@ -46,12 +46,9 @@ public class GUI {
     }
 
     public void setPlayerDetails(int fuelAmount, int playerHealth, int playerPower, int playerScore, int windForce, int parachutesRemaining){
-        // System.out.println(playerWindForces[0]);
         if(numberOfPlayers>0){
             this.fuelAmounts[currentPlayerIndex] = fuelAmount;
-            // this.playerHealths[currentPlayerIndex] = playerHealth;
             this.playerPowers[currentPlayerIndex] = playerPower;
-            // this.playerScores[currentPlayerIndex] = playerScore;
             this.playerWindForces[currentPlayerIndex] = windForce;
             this.playerParachutes[currentPlayerIndex] = parachutesRemaining;
             try{
@@ -100,24 +97,22 @@ public class GUI {
         
         int healthPowerX = screenWidth/2-40;
         int barX = healthPowerX+60;
+        int barY = paddingTop/2 +2;
         int barWidth = 120;
+        int barHeight= 14;
+
         parent.text("Health:", healthPowerX, paddingTop);
-        //remove
-        for(int i = 0; i<numberOfPlayers; i++){
-            parent.text(playerHealths[i], barX + barWidth, paddingTop+i*10);
-        }
-        //remove
-        // parent.text(playerHealths[currentPlayerIndex], barX + barWidth, paddingTop);
+        parent.text(playerHealths[currentPlayerIndex], barX + barWidth + 2, paddingTop);
         parent.text("Power: " + playerPowers[currentPlayerIndex], healthPowerX, paddingTop+25);
         
         parent.fill(0);
-        parent.rect(barX, paddingTop/2, barWidth, CELLSIZE-8);
+        parent.rect(barX, barY, barWidth, barHeight);
 
-        parent.fill(255,0,0);
-        parent.rect(barX, paddingTop/2, Math.round(playerHealths[currentPlayerIndex]*1.2), CELLSIZE-8);
+        parent.fill(playerColors[currentPlayerIndex]);
+        parent.rect(barX, barY, Math.round(playerHealths[currentPlayerIndex]*1.2), barHeight);
 
         parent.fill(255);
-        parent.rect(Math.round(barX+playerPowers[currentPlayerIndex]*1.15), paddingTop/2, 5, CELLSIZE-8);
+        parent.rect(Math.round(barX+playerPowers[currentPlayerIndex]*1.15), barY, 5, barHeight);
     }
 
     public void displayFuel(){
