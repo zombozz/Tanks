@@ -9,18 +9,22 @@ public class Explosion {
     private float x;
     private float y;
     private int CELLSIZE;
-
+    public SoundEffects soundEffects;
     private int explosionRadius = 60;
 
     private int explosionInitialTime;
 
-    public Explosion(PApplet parent, float x, float y, int explosionInitialTime) {
+    private boolean exploded =false;
+
+    public Explosion(PApplet parent, float x, float y, int explosionInitialTime, SoundEffects soundEffects) {
         this.parent=parent;
         this.x = x;
         this.y = y;
         this.explosionInitialTime = explosionInitialTime;
+        this.soundEffects = soundEffects;
     }
     public void Explode(){
+        if(!exploded){
         float explosionDuration = 200.0f; // Duration of the explosion animation in milliseconds
         float currentTime = (float)(parent.millis() - explosionInitialTime);
         
@@ -42,6 +46,9 @@ public class Explosion {
             parent.ellipse(x, y, yellowExplosionRadius, yellowExplosionRadius);
         }
         LevelRenderer.updateTerrainAfterExplosion(Math.round(x),Math.round(y));
+        soundEffects.playExplosionSound();
+        }
+        exploded = true;
     }
     public float getX(){
         return x;

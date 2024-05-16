@@ -22,23 +22,23 @@ public class SoundEffects {
         initialTime = parent.millis();
     }
     public void playExplosionSound() {
-        // explosionSound.rewind();
-        // explosionSound.play();
+        explosionSound.rewind();
+        explosionSound.play();
     }
     public void playPopSound() {
         popSound.rewind();
         popSound.play();
     }
     public void playTankMoveSound() {
-        // tankMoveSound.rewind();
-        // tankMoveSound.play();
+        tankMoveSound.rewind();
+        tankMoveSound.play();
     }
     public void playTurretSound() {
-        // turretSound.rewind();
-        // turretSound.play();
+        turretSound.rewind();
+        turretSound.play();
     }
     public void stopTankMoveSound() {
-        // tankMoveSound.pause();
-        // tankMoveSound.rewind();
+        tankMoveSound.pause();
+        tankMoveSound.rewind();
     }
 }

@@ -42,6 +42,7 @@ public class LevelRenderer {
     private static List<Integer> tankYArray = new ArrayList<>();
 
     public static boolean finishedRendering = false;
+    public boolean tankScoresTaken = false;
 
     private PApplet parent;
     public String[] levelLines;
@@ -49,7 +50,9 @@ public class LevelRenderer {
     private int terrainColor;
     private PImage treesImage;
     private int CELLSIZE;
-    private GUI GUI;
+    public GUI GUI;
+
+    private static List<Integer> tankScores = new ArrayList<>();
 
     public LevelRenderer(PApplet parent, String[] levelLines, int[] playerColors, int terrainColor, PImage treesImage, int CELLSIZE, GUI GUI) {
         this.parent=parent;
@@ -63,12 +66,36 @@ public class LevelRenderer {
 
     private TerrainSmooth terrainSmooth = new TerrainSmooth(parent, terrainColor, CELLSIZE, heights);
 
-    public void reset(){
+    public void reset(boolean newGame){
         finishedRendering=false;
         tanks = new ArrayList<>();
-        tanksNum=0;
         tanks = new ArrayList<>();
         tankIds = new HashSet<>();
+        tanksNum=0;
+        App.selectedTankIndex=0;
+        tankScoresTaken=false;
+        if(newGame){
+            tankScores.clear();
+        }
+    }
+    public List<Integer> getTankScores(){
+        Collections.sort(tanks, Comparator.comparingInt(tank -> tank.getC() - 'A'));
+        if (!tankScoresTaken) {
+            for (Tank tank : tanks) {
+                tankScores.add(tank.playerScore);
+            }
+            tankScoresTaken=true;
+        }
+        return tankScores;
+    }
+    public void updateTankScores(List<Integer> tankScores){
+        int i=0;
+        Collections.sort(tanks, Comparator.comparingInt(tank -> tank.getC() - 'A'));
+        for (Tank tank : tanks) {
+            tank.setScore(tankScores.get(i));
+            i++;
+        }
+        tankScores.clear();
     }
 
     public void renderLevel() {
@@ -111,11 +138,6 @@ public class LevelRenderer {
         }
         renderAllTanks(GUI);
     }
-    // private boolean terrainSmoothed = false;
-    // public static void smoothTerrain() {
-    //     smoothedTerrainArray = terrainSmooth.smooth();
-    //     // terrainSmoothed = true;
-    // }
 
     public static void updateTerrainAfterExplosion(int explosionX, int explosionY) {
         int xRange = 0;
@@ -171,18 +193,59 @@ private static void drawTanks(PApplet parent, char c, int x, int y, int[] player
 public static void renderAllTanks(GUI GUI) {
     int i=0;
     for (Tank tank : tanks) {
-        System.out.println(tank.getInfo());
+        // System.out.println(tank.getInfo());
         i+=1;
-        // tank.setGUI(GUI);
         if(tank.tankAlive) {
             tank.render(smoothedTerrainArray);
-            tank.renderGUI(i);
+        } else {
+            tank.playerHealth = 0;
+            tank.explodeTank();
         }
+        tank.renderGUI(i);
     }
     i=0;
 }
 public static List<Tank> getTanks() {
     Collections.sort(tanks, Comparator.comparingInt(tank -> tank.getC() - 'A'));
     return tanks;
+}
+
+public static float[] getProjectiles() {
+    List<float[]> projectiles = new ArrayList<>();
+    float[] latestProjectile ={0,0,0,0};
+    float largestThirdElement = Float.NEGATIVE_INFINITY;
+    for (Tank tank : tanks) {
+        float[] projectile=tank.getProjectile();
+        if(projectile!=null){
+            projectiles.add(projectile);
+        }
+    }
+    float i = 0;
+    for (float[] projectile : projectiles) {
+        if (projectile[2] > largestThirdElement) {
+            largestThirdElement = projectile[2];
+            latestProjectile = projectile;
+            i++;
+        }
+    }
+    float[] bruh = new float[latestProjectile.length + 1];
+    for (int j = 0; j < latestProjectile.length; j++) {
+        bruh[j] = latestProjectile[j];
+    }
+    bruh[bruh.length - 1] = i;
+    return bruh;
+}
+
+public static List<Integer> damageToScore(){
+    List<Integer> damageRecieved = new ArrayList<>();
+    int totalDamage = 0;
+    int whichTankShot = -1;
+    for (Tank tank : tanks) {
+        totalDamage += tank.getDamageRecieved().get(0);
+        whichTankShot = tank.getDamageRecieved().get(1);
+    }
+    damageRecieved.add(totalDamage);
+    damageRecieved.add(whichTankShot);
+    return damageRecieved;
 }
 }

@@ -11,7 +11,7 @@ public class ExplosionTests {
     @Test
     public void testConstructor() {
         // Test the constructor
-        Explosion explosion = new Explosion(mockApplet, 100, 100, 0);
+        Explosion explosion = new Explosion(mockApplet, 100, 100, 0, new SoundEffects(mockApplet, null));
         
         // Check if the object is not null
         assertNotNull(explosion);
@@ -25,7 +25,8 @@ public class ExplosionTests {
     @Test
     public void testExplode() {
         // Test the Explode method
-        Explosion explosion = new Explosion(mockApplet, 100, 100, 0);
+        Explosion explosion = new Explosion(mockApplet, 100, 100, 0, new SoundEffects(mockApplet, null));
+
         
         // Call the Explode method
         try{

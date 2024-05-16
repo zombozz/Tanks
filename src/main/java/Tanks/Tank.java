@@ -58,7 +58,17 @@ public class Tank {
     private PImage arrowImage;
     
     public boolean tankAlive = true;
+    public boolean tankExploded = false;
 
+    private Explosion explosion;
+    private List<Tank> tanks = App.tanks;
+    private float[] latestProjectilesCoords = App.latestProjectile;
+    
+    private int whichTankShot;
+
+    private float damage = 0;
+
+    private boolean finalHealthAdded = false;
     public Tank(PApplet parent, char c, int[] colors, int x, float y, int size, List<Float> smoothedTerrainArray, GUI GUI) {
         projectiles = new ArrayList<>();
         this.parent = parent;
@@ -73,33 +83,65 @@ public class Tank {
         minim = new Minim(parent);
         soundEffects = new SoundEffects(parent, minim);
     }
+
+    public float[] getProjectile(){
+        try {
+            return projectile.getExplosionCoords();
+        } catch (NullPointerException e) {
+            return null;
+        }
+    }
     public void checkDamage(){
+        damage = 0;
+        latestProjectilesCoords = App.latestProjectile;
+        whichTankShot = Math.round(latestProjectilesCoords[3]);
         try{
             oldExplosionCoords = explosionCoords;
-            explosionCoords = projectile.getExplosionCoords();
+            explosionCoords = latestProjectilesCoords;
             if(!(oldExplosionCoords[0]==explosionCoords[0])){
                 float explosionX = explosionCoords[0];
                 float explosionY = explosionCoords[1];
-                float distanceSquared = (x - explosionX) * (x - explosionX) + (y - explosionY) * (y - explosionY);
-                float distance = parent.sqrt(distanceSquared);
-                int explosionRadius =30;
-                 if (distance <= explosionRadius) {
-                // Calculate damage based on distance
+                float distanceSquared = (tankX - explosionX) * (tankX - explosionX) + (tankY - explosionY) * (tankY - explosionY);
+                float distance = parent.sqrt(distanceSquared); 
+                int explosionRadius =40;
+                if (distance <= explosionRadius) {
                 float maxDamage = 60; 
-                float damage = maxDamage * (1 - distance / explosionRadius);
+                damage = maxDamage * (1 - distance / explosionRadius);
                 playerHealth -= damage;
-                if (playerHealth < 0) {
-                    playerHealth = 0;
-                }
+                System.out.println(damage);
             }
+        } 
+    }catch (NullPointerException  | IndexOutOfBoundsException e){}
+    }
+
+    public List<Integer> getDamageRecieved() {
+        List<Integer> damageRecieved = new ArrayList<>();
+        if(!finalHealthAdded){
+            System.out.println(whichTankShot + " " + App.selectedTankIndex);
+            if(whichTankShot != App.selectedTankIndex-1){
+                damageRecieved.add(Math.round(damage));
+            } else {
+                damageRecieved.add(0);
             }
-        } catch (NullPointerException e){}
+            damageRecieved.add(whichTankShot);
+            if(playerHealth==0){
+                finalHealthAdded = true;
+            }
+            return damageRecieved;
+        } else {
+            damageRecieved.add(0);
+            damageRecieved.add(whichTankShot);
+            return damageRecieved;
+        }
     }
 
     public void checkIfTankFall() {
+        int fallingStartTime;
         if (parachutesRemaining>0 && tankY > previousTankY && tankX == previousTankX) {
             parachuteActive = true;
             parachuteStartTime = parent.millis();
+        } else if (parachutesRemaining==0 && tankY > previousTankY && tankX == previousTankX) {
+            tankFalling = true;
         }
         if (parachuteActive) {
             tankFalling=true;
@@ -114,12 +156,16 @@ public class Tank {
     }
 
     public void moveTank(int moveTankBy) {
-        if(tankAlive && playerFuel>0 && !(tankX+moveTankBy < 0)){
-            soundEffects.playTankMoveSound();
-            this.moveTankBy+=moveTankBy;
-            this.playerFuel-=1;
-        }else if (tankAlive){
-            explodeTank();
+        if(tankAlive && (tankX+moveTankBy > 0) && (tankX+moveTankBy < App.WIDTH)) {
+            if(playerFuel>0){
+                soundEffects.playTankMoveSound();
+                this.moveTankBy+=moveTankBy;
+                this.playerFuel-=1;
+            }
+        } else {
+            tankAlive = false;
+            int explosionInitialTime = parent.millis();
+            explosion = new Explosion(parent, tankX, tankY, explosionInitialTime, soundEffects);
         }
         render(smoothedTerrainArray);
     }
@@ -128,11 +174,24 @@ public class Tank {
         soundEffects.stopTankMoveSound();
     }
 
+    public void changePower(int power){
+        playerPower+=power;
+        if(playerPower > playerHealth){
+            playerPower=playerHealth;
+        } else if(playerPower<0) {
+            playerPower=0;
+        }
+    }
+
+    public void setScore(int playerScore){
+        this.playerScore=playerScore;
+    }
+    public void addScore(int playerScore){
+        this.playerScore+=playerScore;
+    }
+    
     public void explodeTank(){
-        int explosionInitialTime = parent.millis();
-        Explosion explosion = new Explosion(parent, tankX, tankY, explosionInitialTime);
         explosion.Explode();
-        tankAlive = false;
     }
 
     public int tankReset(){
@@ -155,10 +214,12 @@ public class Tank {
     public void renderGUI(int i){
         if(GUI.getCurrentPlayerIndex()+1 ==i){
             GUI.setPlayerDetails(playerFuel, playerHealth, playerPower, playerScore, windForce, parachutesRemaining);
-        }
+        } 
+        GUI.setPlayerScores(i, playerScore, playerHealth);
     }
     
     public void render(List<Float> smoothedTerrainArray) {
+        // System.out.println(playerScore);
         if(tankAlive){
         checkDamage();
         this.smoothedTerrainArray = smoothedTerrainArray;
@@ -168,11 +229,20 @@ public class Tank {
             // tank movement
             int index = c - 'A'; 
             tankX = x * CELLSIZE + moveTankBy;
-            if(tankFalling && tankY < (y1 * CELLSIZE)){
+            if(tankFalling && tankY < (y1 * CELLSIZE) && parachutesRemaining > 0){
                 tankY+=0.5;
+            } else if (tankFalling && tankY < (y1 * CELLSIZE) && parachutesRemaining ==0){
+                tankY+=1;
+                playerHealth-=0.2;
             } else{
                 tankY = y1 * CELLSIZE;
                 tankFalling = false;
+            }
+            if (playerHealth < 0 || playerHealth==0) {
+                playerHealth = 0;
+                tankAlive=false;
+                int explosionInitialTime = parent.millis();
+                explosion = new Explosion(parent, tankX, tankY, explosionInitialTime, soundEffects);
             }
             checkIfTankFall();
             // tank shape
@@ -203,8 +273,11 @@ public class Tank {
                     drawArrow = false;
                 }
             }
+            if(playerPower > playerHealth){
+                playerPower=playerHealth;
+            }
         }
-    } 
+        }
     }
     public char getC(){
         return c;

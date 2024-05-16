@@ -62,8 +62,14 @@ public class App extends PApplet {
     private Powerups powerups;
 
     private boolean settingUp = true;
+    private List<Integer> tankScores = new ArrayList<>();
 	
-    private List<Tank> tanks = LevelRenderer.getTanks();
+    public static List<Tank> tanks = LevelRenderer.getTanks();
+    public static float[] latestProjectile = LevelRenderer.getProjectiles();
+    public static List<Integer> damageToScore;
+
+    private Gameover gameover;
+    private boolean isGameover = false;
 
     public App() {
         this.configPath = "config.json";
@@ -88,14 +94,12 @@ public class App extends PApplet {
     public void setup() {
         settingUp=true;
         powerups = new Powerups();
-        // levelRenderer = new LevelRenderer;
-        // System.out.println(levelRenderer.heights);
         JSONParser parser = new JSONParser();
         GUI = new GUI(this);
         timer = new Timer(this, this.millis());
         minim = new Minim(this);
-        // player = minim.loadFile("src\\main\\resources\\Tanks\\welcome-traveler.mp3");
-        // player.play();
+        player = minim.loadFile("src\\main\\resources\\Tanks\\welcome-traveler.mp3");
+        player.play();
         
         frameRate(FPS);
 
@@ -133,7 +137,8 @@ public class App extends PApplet {
             e.printStackTrace();
         }
         levelRenderer = new LevelRenderer(this, levelLines, playerColors, terrainColor, treesImage, CELLSIZE, GUI);
-        System.out.println(levelLines[9]);
+        levelRenderer.reset(false);
+        levelRenderer.renderLevel();
         settingUp=false;
     }
 
@@ -182,8 +187,10 @@ public class App extends PApplet {
         }
         levelRenderer = new LevelRenderer(this, levelLines, playerColors, terrainColor, treesImage, CELLSIZE, GUI);
         System.out.println(levelLines[9]);
-        levelRenderer.reset();
+        tankScores = levelRenderer.getTankScores();
+        levelRenderer.reset(false);
         levelRenderer.renderLevel();
+        levelRenderer.updateTankScores(tankScores);
         settingUp=false;
     }
 
@@ -195,7 +202,6 @@ public class App extends PApplet {
     
     public void keyPressed(KeyEvent event){
         if (this.keyCode == 37) {//left
-            // System.out.println(tanks.get(selectedTankIndex));
             tanks.get(selectedTankIndex).moveTank(-1);
         } else if (this.keyCode == 39) {//right
             tanks.get(selectedTankIndex).moveTank(1);
@@ -203,25 +209,30 @@ public class App extends PApplet {
             tanks.get(selectedTankIndex).moveTurret(-6);
         } else if (this.keyCode == 40) {//down
             tanks.get(selectedTankIndex).moveTurret(6);
-        }else if (this.keyCode == 32) { 
+        } else if (this.keyCode == 87) {//w
+            tanks.get(selectedTankIndex).changePower(1);
+        } else if (this.keyCode == 83) {//s
+            tanks.get(selectedTankIndex).changePower(-1);
+        }else if (this.keyCode == 32) {//spacebar 
             tanks.get(selectedTankIndex).shootTurret();
             nextTank();
-            // System.out.println(selectedTankIndex);
         } else if (this.keyCode == 82) { // R key
             powerups.repairTank(tanks.get(selectedTankIndex));
+            if (isGameover) {
+                levelNo = 0;
+                levelRenderer.reset(true);
+                setup();
+                levelNo=-1;
+                nextLevel();
+            }
         } else if (this.keyCode == 70) { // F key
             powerups.addFuel(tanks.get(selectedTankIndex));
-        } else if (this.keyCode == 35) {
-            exit();
-        } else if (this.keyCode == 81) {
+        }else if (this.keyCode == 81) {
             nextLevel();
-        } else if (this.keyCode == 9) {
-            loadLevel();
-        } 
+        }
     }
     public void nextTank(){
         selectedTankIndex+=1;
-        // System.out.println(tanksNum);
         if(selectedTankIndex >= tanksNum){
             selectedTankIndex=0;
         }
@@ -244,12 +255,21 @@ public class App extends PApplet {
     }
 
     public void nextLevel(){
-        levelNo+=1;
-        for (Tank tank : tanks) {
-            tank.tankAlive=true;
+        try{
+            levelNo+=1;
+            for (Tank tank : tanks) {
+                tank.tankAlive=true;
+            }
+            loadLevel();
+            numSet=false;
+        } catch (IndexOutOfBoundsException e) {
+            settingUp = true;
+            tankScores = levelRenderer.getTankScores();
+            isGameover = true;
+            if(isGameover) {
+                gameover = new Gameover(this, tankScores);
+            }
         }
-        // setup();
-        loadLevel();
     }
     
 	@Override
@@ -263,7 +283,12 @@ public class App extends PApplet {
 	@Override
     public void draw() {
         if(!settingUp){
-            List<Tank> tanks = levelRenderer.getTanks();
+            tanks = levelRenderer.getTanks();
+            latestProjectile = levelRenderer.getProjectiles();
+            damageToScore = levelRenderer.damageToScore();
+            if(damageToScore.get(0)!=0){
+                tanks.get(damageToScore.get(1)-1).addScore(damageToScore.get(0));;
+            }
             noStroke();
             image(backgroundImage, 0, 0, width, height);
             levelRenderer.renderLevel();
@@ -287,27 +312,11 @@ public class App extends PApplet {
                 }
             } catch (IndexOutOfBoundsException e){}
             checkTanksRemaining();
-        } else{
-            System.out.println("SETTING UPngUp");
         }
     }
-        
         
     public static void main(String[] args) {
         PApplet.main("Tanks.App");
     }
-    
-    @Override
-    public void mousePressed(MouseEvent e) {
-        //TODO - powerups, like repair and extra fuel and teleport
-
-
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-
-    }
-        
 }
     

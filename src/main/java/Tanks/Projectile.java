@@ -47,24 +47,25 @@ public class Projectile {
         soundEffects.playPopSound();
     }
     public float[] getExplosionCoords(){
-        return new float[]{explosionX, explosionY};
+        return new float[]{explosionX, explosionY, explosionInitialTime};
     }
+    
     public void setExplosionCoords(float x, float y){
         this.explosionX = x;
         this.explosionY = y;
     }
     public void doExplosion() {
-        soundEffects.playExplosionSound();
+        // soundEffects.playExplosionSound();
         if(!didItExplode){
             explosionInitialTime = parent.millis();
             didItExplode = true;
+            System.out.println("no");
+            setExplosionCoords(x, y);
         }
+        Explosion explosion = new Explosion(parent, x, y, explosionInitialTime, soundEffects);
         if(parent.millis()-explosionInitialTime<201){
-            Explosion explosion = new Explosion(parent, x, y, explosionInitialTime);
-            
             try {
                 explosion.Explode();
-                setExplosionCoords(x, y);
             } catch (NullPointerException e)  {
 
             }
@@ -81,13 +82,14 @@ public class Projectile {
         if  (smoothedTerrainArray.size() > x) {
             try{
                 y1 = smoothedTerrainArray.get(Math.round(x));
-                if(((y/30)-1 > y1) || (y < 0) || (x<0) || (x>ScreenX) || (y>ScreenY)) {
+                if((((y/30)-1 > y1) || (y < 0) || (x<0) || (x>ScreenX) || (y>ScreenY))) {
                     doExplosion();
                 } else {
-                    gravity+=0.072;
+                    gravity+=3.6;
                     x+=windForce*0.03;
                     //do trajectory
-                    y += gravity*power/10;
+                    // y += gravity*power/10;
+                    y += gravity/5;
                     x += vx; // Update x position
                     y += vy; // Update y position     
                 } 

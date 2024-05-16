@@ -49,13 +49,19 @@ public class GUI {
         // System.out.println(playerWindForces[0]);
         if(numberOfPlayers>0){
             this.fuelAmounts[currentPlayerIndex] = fuelAmount;
-            this.playerHealths[currentPlayerIndex] = playerHealth;
+            // this.playerHealths[currentPlayerIndex] = playerHealth;
             this.playerPowers[currentPlayerIndex] = playerPower;
-            this.playerScores[currentPlayerIndex] = playerScore;
+            // this.playerScores[currentPlayerIndex] = playerScore;
             this.playerWindForces[currentPlayerIndex] = windForce;
             this.playerParachutes[currentPlayerIndex] = parachutesRemaining;
             try{
             } catch (NullPointerException e){}
+        }
+    }
+    public void setPlayerScores(int i, int playerScore, int playerHealth){
+        if(numberOfPlayers>0){
+            this.playerScores[i-1] = playerScore;
+            this.playerHealths[i-1] = playerHealth;
         }
     }
     public int getCurrentPlayerIndex(){
@@ -91,10 +97,10 @@ public class GUI {
     public void displayBar(){
         parent.fill(0);
         parent.textSize(15);
-
+        
         int healthPowerX = screenWidth/2-40;
         int barX = healthPowerX+60;
-        int barWidth = CELLSIZE*4;
+        int barWidth = 120;
         parent.text("Health:", healthPowerX, paddingTop);
         //remove
         for(int i = 0; i<numberOfPlayers; i++){
@@ -103,9 +109,15 @@ public class GUI {
         //remove
         // parent.text(playerHealths[currentPlayerIndex], barX + barWidth, paddingTop);
         parent.text("Power: " + playerPowers[currentPlayerIndex], healthPowerX, paddingTop+25);
+        
+        parent.fill(0);
+        parent.rect(barX, paddingTop/2, barWidth, CELLSIZE-8);
 
         parent.fill(255,0,0);
-        parent.rect(barX, paddingTop/2, barWidth, CELLSIZE-8);
+        parent.rect(barX, paddingTop/2, Math.round(playerHealths[currentPlayerIndex]*1.2), CELLSIZE-8);
+
+        parent.fill(255);
+        parent.rect(Math.round(barX+playerPowers[currentPlayerIndex]*1.15), paddingTop/2, 5, CELLSIZE-8);
     }
 
     public void displayFuel(){
