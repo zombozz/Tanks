@@ -32,7 +32,7 @@ public class Gameover {
         parent.fill(255);
         parent.textSize(30);
         parent.text("Player " + winner + " wins!", centerWidth-40, h / 3-10);
-        parent.fill(playerColors[winner-65], 50);
+        parent.fill(playerColors[winner-65], 60);
         parent.rect(centerWidth-30, h / 3, 180, 170);
         parent.textSize(20);
         pt += 50;
@@ -60,7 +60,7 @@ public class Gameover {
         parent.text("Press 'r' to restart", centerWidth-5, h * 5 / 6);
     }
 
-    private char getWinner(Map<Character, Integer> tankScoresMap) {
+    public char getWinner(Map<Character, Integer> tankScoresMap) {
         char winner = 'A';
         int maxScore = Integer.MIN_VALUE;
         for (Map.Entry<Character, Integer> entry : tankScoresMap.entrySet()) {
@@ -73,14 +73,14 @@ public class Gameover {
     }
 
     // Method to sort tank scores in descending order
-    private List<Character> sortScoresDescending(Map<Character, Integer> tankScoresMap) {
+    public List<Character> sortScoresDescending(Map<Character, Integer> tankScoresMap) {
         List<Character> tankKeys = new ArrayList<>(tankScoresMap.keySet());
         tankKeys.sort((t1, t2) -> tankScoresMap.get(t2) - tankScoresMap.get(t1));
         return tankKeys;
     }
 
     // Method to display score with delay
-    private void displayScoreWithDelay(PApplet parent, String scoreText, int x, int y, int delay, int index, int startTime) {
+    public void displayScoreWithDelay(PApplet parent, String scoreText, int x, int y, int delay, int index, int startTime) {
         parent.fill(255); // Set text color to white
         // if (startTime > delay * (index + 1)) {
             parent.text(scoreText, x, y);

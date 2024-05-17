@@ -24,79 +24,85 @@ public class Projectile {
 <span class="fc" id="L24">    public boolean didItExplode = false;</span>
     public int explosionInitialTime;
 <span class="fc" id="L26">    public float gravity = 0.0f;</span>
+    public int windForce;
 
     public SoundEffects soundEffects;
 
-<span class="fc" id="L30">    public float explosionX = 0;</span>
-<span class="fc" id="L31">    public float explosionY = 0;</span>
+<span class="fc" id="L31">    public float explosionX = 0;</span>
+<span class="fc" id="L32">    public float explosionY = 0;</span>
 
-<span class="fc" id="L33">    public Projectile(PApplet parent, float x, float y, float power, int CELLSIZE, float rotationAngle, List&lt;Float&gt; smoothedTerrainArray, SoundEffects soundEffects) {</span>
-<span class="fc" id="L34">        this.soundEffects = soundEffects;</span>
-<span class="fc" id="L35">        this.parent = parent;</span>
-<span class="fc" id="L36">        this.x = x;</span>
-<span class="fc" id="L37">        this.y = y;</span>
-<span class="fc" id="L38">        this.power = power;</span>
-<span class="fc" id="L39">        this.rotationAngle = rotationAngle - 90;</span>
-<span class="fc" id="L40">        this.CELLSIZE = CELLSIZE;</span>
-<span class="fc" id="L41">        this.smoothedTerrainArray = smoothedTerrainArray;</span>
-<span class="fc" id="L42">        isNull = false;</span>
-<span class="fc" id="L43">        initialTime = parent.millis();</span>
-<span class="nc" id="L44">        soundEffects.playPopSound();</span>
-<span class="nc" id="L45">    }</span>
+<span class="fc" id="L34">    public Projectile(PApplet parent, float x, float y, float power, int CELLSIZE, float rotationAngle, List&lt;Float&gt; smoothedTerrainArray, SoundEffects soundEffects, int windForce) {</span>
+<span class="fc" id="L35">        this.soundEffects = soundEffects;</span>
+<span class="fc" id="L36">        this.parent = parent;</span>
+<span class="fc" id="L37">        this.x = x;</span>
+<span class="fc" id="L38">        this.y = y;</span>
+<span class="fc" id="L39">        this.power = power;</span>
+<span class="fc" id="L40">        this.rotationAngle = rotationAngle - 90;</span>
+<span class="fc" id="L41">        this.CELLSIZE = CELLSIZE;</span>
+<span class="fc" id="L42">        this.smoothedTerrainArray = smoothedTerrainArray;</span>
+<span class="fc" id="L43">        this.windForce = windForce; </span>
+
+<span class="fc" id="L45">        isNull = false;</span>
+<span class="fc" id="L46">        initialTime = parent.millis();</span>
+<span class="nc" id="L47">        soundEffects.playPopSound();</span>
+<span class="nc" id="L48">    }</span>
     public float[] getExplosionCoords(){
-<span class="nc" id="L47">        return new float[]{explosionX, explosionY};</span>
+<span class="nc" id="L50">        return new float[]{explosionX, explosionY, explosionInitialTime};</span>
     }
+    
     public void setExplosionCoords(float x, float y){
-<span class="nc" id="L50">        this.explosionX = x;</span>
-<span class="nc" id="L51">        this.explosionY = y;</span>
-<span class="nc" id="L52">    }</span>
+<span class="nc" id="L54">        this.explosionX = x;</span>
+<span class="nc" id="L55">        this.explosionY = y;</span>
+<span class="nc" id="L56">    }</span>
     public void doExplosion() {
-<span class="nc" id="L54">        soundEffects.playExplosionSound();</span>
-<span class="nc bnc" id="L55" title="All 2 branches missed.">        if(!didItExplode){</span>
-<span class="nc" id="L56">            explosionInitialTime = parent.millis();</span>
-<span class="nc" id="L57">            didItExplode = true;</span>
+        // soundEffects.playExplosionSound();
+<span class="nc bnc" id="L59" title="All 2 branches missed.">        if(!didItExplode){</span>
+<span class="nc" id="L60">            explosionInitialTime = parent.millis();</span>
+<span class="nc" id="L61">            didItExplode = true;</span>
+<span class="nc" id="L62">            System.out.println(&quot;no&quot;);</span>
+<span class="nc" id="L63">            setExplosionCoords(x, y);</span>
         }
-<span class="nc bnc" id="L59" title="All 2 branches missed.">        if(parent.millis()-explosionInitialTime&lt;201){</span>
-<span class="nc" id="L60">            Explosion explosion = new Explosion(parent, x, y, explosionInitialTime);</span>
-            
+<span class="nc" id="L65">        Explosion explosion = new Explosion(parent, x, y, explosionInitialTime, soundEffects);</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">        if(parent.millis()-explosionInitialTime&lt;201){</span>
             try {
-<span class="nc" id="L63">                explosion.Explode();</span>
-<span class="nc" id="L64">                setExplosionCoords(x, y);</span>
-<span class="nc" id="L65">            } catch (NullPointerException e)  {</span>
+<span class="nc" id="L68">                explosion.Explode();</span>
+<span class="nc" id="L69">            } catch (NullPointerException e)  {</span>
 
-<span class="nc" id="L67">            }</span>
-<span class="nc" id="L68">        }else{</span>
+<span class="nc" id="L71">            }</span>
+        }else{
             
-<span class="nc" id="L70">            isNull = true;</span>
+<span class="nc" id="L74">            isNull = true;</span>
         }
-<span class="nc" id="L72">    }</span>
+<span class="nc" id="L76">    }</span>
     public void update() {   
         
-<span class="nc" id="L75">        float angleInRadians = PApplet.radians(rotationAngle);</span>
-<span class="nc" id="L76">        float vx = power /5* cos(angleInRadians); // Calculate the x-component of velocity</span>
-<span class="nc" id="L77">        float vy = power /5* sin(angleInRadians); // Calculate the y-component of velocity</span>
-<span class="nc bnc" id="L78" title="All 2 branches missed.">        if  (smoothedTerrainArray.size() &gt; x) {</span>
+<span class="nc" id="L79">        float angleInRadians = PApplet.radians(rotationAngle);</span>
+<span class="nc" id="L80">        float vx = power /5* cos(angleInRadians); // Calculate the x-component of velocity</span>
+<span class="nc" id="L81">        float vy = power /5* sin(angleInRadians); // Calculate the y-component of velocity</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        if  (smoothedTerrainArray.size() &gt; x) {</span>
             try{
-<span class="nc" id="L80">                y1 = smoothedTerrainArray.get(Math.round(x));</span>
-<span class="nc bnc" id="L81" title="All 10 branches missed.">                if(((y/30)-1 &gt; y1) || (y &lt; 0) || (x&lt;0) || (x&gt;ScreenX) || (y&gt;ScreenY)) {</span>
-<span class="nc" id="L82">                    doExplosion();</span>
+<span class="nc" id="L84">                y1 = smoothedTerrainArray.get(Math.round(x));</span>
+<span class="nc bnc" id="L85" title="All 10 branches missed.">                if((((y/30)-1 &gt; y1) || (y &lt; 0) || (x&lt;0) || (x&gt;ScreenX) || (y&gt;ScreenY))) {</span>
+<span class="nc" id="L86">                    doExplosion();</span>
                 } else {
-<span class="nc" id="L84">                    gravity+=0.072;</span>
+<span class="nc" id="L88">                    gravity+=3.6;</span>
+<span class="nc" id="L89">                    x+=windForce*0.03;</span>
                     //do trajectory
-<span class="nc" id="L86">                    y += gravity*power/10;</span>
-<span class="nc" id="L87">                    x += vx; // Update x position</span>
-<span class="nc" id="L88">                    y += vy; // Update y position     </span>
+                    // y += gravity*power/10;
+<span class="nc" id="L92">                    y += gravity/5;</span>
+<span class="nc" id="L93">                    x += vx; // Update x position</span>
+<span class="nc" id="L94">                    y += vy; // Update y position     </span>
                 } 
-<span class="nc" id="L90">            } catch (IndexOutOfBoundsException e) {}</span>
+<span class="nc" id="L96">            } catch (IndexOutOfBoundsException e) {}</span>
         }
-<span class="nc" id="L92">    }</span>
+<span class="nc" id="L98">    }</span>
     public void display() {
-<span class="nc bnc" id="L94" title="All 2 branches missed.">        if(parent!= null) {</span>
-<span class="nc bnc" id="L95" title="All 2 branches missed.">            if(!didItExplode) {</span>
-<span class="nc" id="L96">                parent.fill(0, 0, 0);</span>
-<span class="nc" id="L97">                parent.ellipse(x, y, CELLSIZE/8, CELLSIZE/8);</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">        if(parent!= null) {</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">            if(!didItExplode) {</span>
+<span class="nc" id="L102">                parent.fill(0, 0, 0);</span>
+<span class="nc" id="L103">                parent.ellipse(x, y, CELLSIZE/8, CELLSIZE/8);</span>
             }
         }
-<span class="nc" id="L100">    }</span>
+<span class="nc" id="L106">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

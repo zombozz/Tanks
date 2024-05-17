@@ -9,7 +9,7 @@ import processing.core.PImage;
 public class Tank {
     private PApplet parent;
     public char c;
-    private int[] colors;
+    public int[] colors;
     private int x;
     private float y;
     private int CELLSIZE;
@@ -21,10 +21,10 @@ public class Tank {
     private Projectile projectile;
     private float rotationAngle;
 
-    private float tankX;
-    private float tankY;
-    private float previousTankX;
-    private float previousTankY;
+    public float tankX;
+    public float tankY;
+    public float previousTankX;
+    public float previousTankY;
     private float y1;
     
     public int playerFuel = 250;
@@ -41,7 +41,7 @@ public class Tank {
     private float[] explosionCoords;
     private float[] oldExplosionCoords;
 
-    private List<Projectile> projectiles;
+    public List<Projectile> projectiles;
 
     private Minim minim;
     private SoundEffects soundEffects;
@@ -62,11 +62,13 @@ public class Tank {
 
     private Explosion explosion;
     private List<Tank> tanks = App.tanks;
+    public List<Integer> damageReceived = new ArrayList<>();
     private float[] latestProjectilesCoords = App.latestProjectile;
     
     private int whichTankShot;
 
     private float damage = 0;
+
 
     private boolean finalHealthAdded = false;
     public Tank(PApplet parent, char c, int[] colors, int x, float y, int size, List<Float> smoothedTerrainArray, GUI GUI) {
@@ -115,23 +117,24 @@ public class Tank {
     }
 
     public List<Integer> getDamageRecieved() {
-        List<Integer> damageRecieved = new ArrayList<>();
+        // List<Integer> damageReceived = new ArrayList<>();
+        damageReceived = new ArrayList<>();
         if(!finalHealthAdded){
             System.out.println(whichTankShot + " " + App.selectedTankIndex);
             if(whichTankShot != App.selectedTankIndex-1){
-                damageRecieved.add(Math.round(damage));
+                damageReceived.add(Math.round(damage));
             } else {
-                damageRecieved.add(0);
+                damageReceived.add(0);
             }
-            damageRecieved.add(whichTankShot);
+            damageReceived.add(whichTankShot);
             if(playerHealth==0){
                 finalHealthAdded = true;
             }
-            return damageRecieved;
+            return damageReceived;
         } else {
-            damageRecieved.add(0);
-            damageRecieved.add(whichTankShot);
-            return damageRecieved;
+            damageReceived.add(0);
+            damageReceived.add(whichTankShot);
+            return damageReceived;
         }
     }
 
@@ -301,6 +304,31 @@ public class Tank {
     public String getInfo() {
         String bruh = c + "  "+ Integer.toString(x) +  "  "+ Float.toString(y);
         return bruh;
+    }
+
+    public void takeDamage(int damage) {
+        playerHealth -= damage;
+    }
+    public void heal(int health) {
+        playerHealth+=health;
+    }
+    public void setHealth(int health) {
+        playerHealth=health;
+    }
+    public void setFuel(int fuel) {
+        playerFuel+=fuel;
+    }
+    public int getHealth() {
+        return playerHealth;
+    }
+    public int getScore() {
+        return playerScore;
+    }
+    public int getFuel() {
+        return playerFuel;
+    }
+    public int[] getColor() {
+        return colors;
     }
 }
 

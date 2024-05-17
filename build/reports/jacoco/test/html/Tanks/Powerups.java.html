@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Powerups.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tanks_scaffold</a> &gt; <a href="index.source.html" class="el_package">Tanks</a> &gt; <span class="el_source">Powerups.java</span></div><h1>Powerups.java</h1><pre class="source lang-java linenums">package Tanks;
+
+<span class="fc" id="L3">public class Powerups {</span>
+    public void repairTank(Tank tank) {
+<span class="nc bnc" id="L5" title="All 4 branches missed.">        if (tank.playerScore&gt;=20 &amp;&amp; tank.playerHealth &lt;100){</span>
+<span class="nc" id="L6">            tank.playerHealth+=20;</span>
+<span class="nc" id="L7">            tank.playerScore-=20;</span>
+        }
+<span class="nc bnc" id="L9" title="All 2 branches missed.">        if (tank.playerHealth &gt; 100) {</span>
+<span class="nc" id="L10">            tank.playerHealth = 100; </span>
+        }
+<span class="nc" id="L12">    }</span>
+    public void addFuel(Tank tank) {
+<span class="nc bnc" id="L14" title="All 2 branches missed.">        if (tank.playerScore&gt;=10){</span>
+<span class="nc" id="L15">            tank.playerFuel+=200;</span>
+<span class="nc" id="L16">            tank.playerScore-=10;</span>
+        }
+<span class="nc" id="L18">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

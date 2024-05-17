@@ -22,16 +22,16 @@ import org.json.simple.parser.ParseException;
 import java.io.*;
 import java.util.*;
 
-<span class="nc" id="L25">public class LevelRenderer {</span>
+public class LevelRenderer {
 <span class="fc" id="L26">    public static Map&lt;Integer, Integer&gt; heights = new HashMap&lt;&gt;();</span>
-    private static TerrainSmooth terrainSmooth;
+    // private static TerrainSmooth terrainSmooth;
 <span class="fc" id="L28">    public static List&lt;Float&gt; smoothedTerrainArray = new ArrayList&lt;&gt;();</span>
 <span class="fc" id="L29">    public static List&lt;Tank&gt; tanks = new ArrayList&lt;&gt;();</span>
     private static float yCoord;
     private static int xSize;
     private static int moveBy;
     public static int tanksNum;
-<span class="fc" id="L34">    private static Set&lt;Character&gt; tankIds = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L34">    public static Set&lt;Character&gt; tankIds = new HashSet&lt;&gt;();</span>
 
 <span class="fc" id="L36">    private static int ScreenY= App.HEIGHT;</span>
 <span class="fc" id="L37">    private static int ScreenX = App.WIDTH;</span>
@@ -41,124 +41,212 @@ import java.util.*;
 <span class="fc" id="L41">    private static List&lt;Integer&gt; tankXArray = new ArrayList&lt;&gt;();</span>
 <span class="fc" id="L42">    private static List&lt;Integer&gt; tankYArray = new ArrayList&lt;&gt;();</span>
 
-    public static GUI GUI;
+<span class="fc" id="L44">    public static boolean finishedRendering = false;</span>
+<span class="fc" id="L45">    public boolean tankScoresTaken = false;</span>
 
-<span class="fc" id="L46">    public static boolean finishedRendering = false;</span>
-    
-    public static void renderLevel(PApplet parent, String[] levelLines, int[] playerColors, int terrainColor, PImage treesImage, int CELLSIZE, GUI GUI) {
-<span class="fc" id="L49">        terrainSmooth = new TerrainSmooth(parent, terrainColor, CELLSIZE, heights);</span>
-<span class="pc bpc" id="L50" title="1 of 2 branches missed.">        if(!finishedRendering){</span>
-<span class="fc bfc" id="L51" title="All 2 branches covered.">        for (int y = 0; y &lt; levelLines.length; y++) {</span>
-<span class="fc" id="L52">            String line = levelLines[y];</span>
-<span class="fc bfc" id="L53" title="All 2 branches covered.">            for (int x = 0; x &lt; line.length(); x++) {</span>
-<span class="fc" id="L54">                char c = line.charAt(x);</span>
-<span class="pc bpc" id="L55" title="1 of 4 branches missed.">                switch(c) {</span>
+    private PApplet parent;
+    public String[] levelLines;
+    private int[] playerColors;
+    private int terrainColor;
+    private PImage treesImage;
+    private int CELLSIZE;
+    public GUI GUI;
+
+<span class="fc" id="L55">    public static List&lt;Integer&gt; tankScores = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L57">    public LevelRenderer(PApplet parent, String[] levelLines, int[] playerColors, int terrainColor, PImage treesImage, int CELLSIZE, GUI GUI) {</span>
+<span class="fc" id="L58">        this.parent=parent;</span>
+<span class="fc" id="L59">        this.levelLines=levelLines;</span>
+<span class="fc" id="L60">        this.playerColors=playerColors;</span>
+<span class="fc" id="L61">        this.terrainColor=terrainColor;</span>
+<span class="fc" id="L62">        this.treesImage=treesImage;</span>
+<span class="fc" id="L63">        this.CELLSIZE=CELLSIZE;</span>
+<span class="fc" id="L64">        this.GUI=GUI;</span>
+<span class="fc" id="L65">    }</span>
+
+<span class="fc" id="L67">    private TerrainSmooth terrainSmooth = new TerrainSmooth(parent, terrainColor, CELLSIZE, heights);</span>
+
+    public void reset(boolean newGame){
+<span class="fc" id="L70">        finishedRendering=false;</span>
+<span class="fc" id="L71">        tanks = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L72">        tanks = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L73">        tankIds = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L74">        tanksNum=0;</span>
+<span class="fc" id="L75">        App.selectedTankIndex=0;</span>
+<span class="fc" id="L76">        tankScoresTaken=false;</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">        if(newGame){</span>
+<span class="fc" id="L78">            tankScores.clear();</span>
+        }
+<span class="fc" id="L80">    }</span>
+    public List&lt;Integer&gt; getTankScores(){
+<span class="fc" id="L82">        Collections.sort(tanks, Comparator.comparingInt(tank -&gt; tank.getC() - 'A'));</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        if (!tankScoresTaken) {</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">            for (Tank tank : tanks) {</span>
+<span class="fc" id="L85">                tankScores.add(tank.playerScore);</span>
+<span class="fc" id="L86">            }</span>
+<span class="fc" id="L87">            tankScoresTaken=true;</span>
+        }
+<span class="fc" id="L89">        return tankScores;</span>
+    }
+    public void updateTankScores(List&lt;Integer&gt; tankScores){
+<span class="fc" id="L92">        int i=0;</span>
+<span class="fc" id="L93">        Collections.sort(tanks, Comparator.comparingInt(tank -&gt; tank.getC() - 'A'));</span>
+<span class="fc bfc" id="L94" title="All 2 branches covered.">        for (Tank tank : tanks) {</span>
+<span class="fc" id="L95">            tank.setScore(tankScores.get(i));</span>
+<span class="fc" id="L96">            i++;</span>
+<span class="fc" id="L97">        }</span>
+<span class="fc" id="L98">        tankScores.clear();</span>
+<span class="fc" id="L99">    }</span>
+
+    public void renderLevel() {
+        
+<span class="fc bfc" id="L103" title="All 2 branches covered.">        if(!finishedRendering){</span>
+<span class="fc bfc" id="L104" title="All 2 branches covered.">            for (int y = 0; y &lt; levelLines.length; y++) {</span>
+<span class="fc" id="L105">            String line = levelLines[y];</span>
+<span class="fc bfc" id="L106" title="All 2 branches covered.">            for (int x = 0; x &lt; line.length(); x++) {</span>
+<span class="fc" id="L107">                char c = line.charAt(x);</span>
+<span class="fc bfc" id="L108" title="All 4 branches covered.">                switch(c) {</span>
                     case 'X':
-<span class="fc" id="L57">                        heights.put(x, y);</span>
-<span class="fc" id="L58">                        drawTerrain(parent, terrainColor, x, y, CELLSIZE);</span>
-                        // parent.fill(terrainColor);
-                        // parent.rect(x * CELLSIZE, y * CELLSIZE, CELLSIZE, (20-y)*CELLSIZE);
-<span class="fc" id="L61">                        break;</span>
+<span class="fc" id="L110">                        heights.put(x, y);</span>
+<span class="fc" id="L111">                        drawTerrain(parent, terrainColor, x, y, CELLSIZE);</span>
+<span class="fc" id="L112">                        break;</span>
                     case 'T':
-<span class="fc" id="L63">                        treeXArray.add(x);</span>
-<span class="fc" id="L64">                        treeYArray.add(y);</span>
-<span class="fc" id="L65">                        drawTrees(parent, x, y, CELLSIZE, treesImage);</span>
-<span class="fc" id="L66">                        break;</span>
+<span class="fc" id="L114">                        treeXArray.add(x);</span>
+<span class="fc" id="L115">                        treeYArray.add(y);</span>
+<span class="fc" id="L116">                        drawTrees(parent, x, y, CELLSIZE, treesImage);</span>
+<span class="fc" id="L117">                        break;</span>
                     case ' ':
-<span class="fc" id="L68">                        break;</span>
+<span class="fc" id="L119">                        break;</span>
                     default:
-<span class="nc" id="L70">                        drawTanks(parent, c, x, y, playerColors, CELLSIZE, smoothedTerrainArray);</span>
+<span class="fc" id="L121">                        drawTanks(parent, c, x, y, playerColors, CELLSIZE, smoothedTerrainArray, GUI);</span>
                         break;
                 }
             }
         }
         // smoothTerrain();
-<span class="fc" id="L76">        smoothedTerrainArray = terrainSmooth.smooth();</span>
-<span class="fc" id="L77">        finishedRendering = true;</span>
+<span class="fc" id="L127">        smoothedTerrainArray = terrainSmooth.smooth();</span>
+<span class="fc" id="L128">        finishedRendering = true;</span>
         } else {
-<span class="nc bnc" id="L79" title="All 2 branches missed.">            for (Map.Entry&lt;Integer, Integer&gt; entry : heights.entrySet()) {</span>
-<span class="nc" id="L80">                int x = entry.getKey();</span>
-<span class="nc" id="L81">                int y = entry.getValue();</span>
-<span class="nc" id="L82">                drawTerrain(parent, terrainColor, x, y, CELLSIZE);</span>
-<span class="nc" id="L83">            }</span>
-<span class="nc bnc" id="L84" title="All 2 branches missed.">            for (int i = 0; i &lt; treeXArray.size(); i++) {</span>
-<span class="nc" id="L85">                drawTrees(parent, treeXArray.get(i), treeYArray.get(i), CELLSIZE, treesImage);</span>
+<span class="fc bfc" id="L130" title="All 2 branches covered.">            for (Map.Entry&lt;Integer, Integer&gt; entry : heights.entrySet()) {</span>
+<span class="fc" id="L131">                int x = entry.getKey();</span>
+<span class="fc" id="L132">                int y = entry.getValue();</span>
+<span class="fc" id="L133">                drawTerrain(parent, terrainColor, x, y, CELLSIZE);</span>
+<span class="fc" id="L134">            }</span>
+<span class="fc bfc" id="L135" title="All 2 branches covered.">            for (int i = 0; i &lt; treeXArray.size(); i++) {</span>
+<span class="fc" id="L136">                drawTrees(parent, treeXArray.get(i), treeYArray.get(i), CELLSIZE, treesImage);</span>
             }
         }
-<span class="fc" id="L88">        renderAllTanks(GUI);</span>
-<span class="fc" id="L89">    }</span>
-    // private boolean terrainSmoothed = false;
-    // public static void smoothTerrain() {
-    //     smoothedTerrainArray = terrainSmooth.smooth();
-    //     // terrainSmoothed = true;
-    // }
+<span class="fc" id="L139">        renderAllTanks(GUI);</span>
+<span class="fc" id="L140">    }</span>
 
     public static void updateTerrainAfterExplosion(int explosionX, int explosionY) {
-        // Update heights map based on the explosion coordinates
-<span class="fc" id="L98">        int xRange = 0;</span>
-<span class="fc" id="L99">        boolean middleReached = false;</span>
-<span class="pc bpc" id="L100" title="1 of 2 branches missed.">        for (int x = explosionX - 30; x &lt;= explosionX + 30; x++) {</span>
+<span class="fc" id="L143">        int xRange = 0;</span>
+<span class="fc" id="L144">        boolean middleReached = false;</span>
+<span class="pc bpc" id="L145" title="1 of 2 branches missed.">        for (int x = explosionX - 30; x &lt;= explosionX + 30; x++) {</span>
             // for (int y = explosionY - 30; y &lt;= explosionY + 30; y++) {
                 // Check if the coordinate is within the bounds of the level
-<span class="fc bfc" id="L103" title="All 4 branches covered.">                if(xRange==30 &amp;&amp; !middleReached){</span>
-<span class="fc" id="L104">                    middleReached = true;</span>
-<span class="fc bfc" id="L105" title="All 2 branches covered.">                } else if (middleReached){</span>
-<span class="fc" id="L106">                    xRange-=1;</span>
+<span class="fc bfc" id="L148" title="All 4 branches covered.">                if(xRange==30 &amp;&amp; !middleReached){</span>
+<span class="fc" id="L149">                    middleReached = true;</span>
+<span class="fc bfc" id="L150" title="All 2 branches covered.">                } else if (middleReached){</span>
+<span class="fc" id="L151">                    xRange-=1;</span>
                 } else {
-<span class="fc" id="L108">                    xRange+=1;</span>
+<span class="fc" id="L153">                    xRange+=1;</span>
                 }
-<span class="pc bpc" id="L110" title="1 of 4 branches missed.">                if (x &gt;= 0 &amp;&amp; x &lt; ScreenX) {</span>
+<span class="pc bpc" id="L155" title="1 of 4 branches missed.">                if (x &gt;= 0 &amp;&amp; x &lt; ScreenX) {</span>
                     // Update the heights map to reflect destruction caused by the explosion
-<span class="fc" id="L112">                    float currentVal = smoothedTerrainArray.get(x);</span>
-<span class="fc" id="L113">                    currentVal +=0.3*xRange/30;</span>
-<span class="fc" id="L114">                    smoothedTerrainArray.set(x, currentVal);</span>
+<span class="fc" id="L157">                    float currentVal = smoothedTerrainArray.get(x);</span>
+<span class="fc" id="L158">                    currentVal +=0.3*xRange/30;</span>
+<span class="fc" id="L159">                    smoothedTerrainArray.set(x, currentVal);</span>
                 }
             // }
         }
-<span class="nc" id="L118">    }</span>
+<span class="nc" id="L163">    }</span>
 
 private static void drawTerrain(PApplet parent, int terrainColor, int x, int y, int CELLSIZE) {
-<span class="fc" id="L121">    int x1=0;</span>
-<span class="pc bpc" id="L122" title="1 of 2 branches missed.">    for (Float y1: smoothedTerrainArray) {</span>
-<span class="nc" id="L123">        parent.fill(terrainColor);</span>
-<span class="nc" id="L124">        parent.rect(x1, y1*CELLSIZE, 1, (20-y1)*CELLSIZE);</span>
-<span class="nc" id="L125">        x1+=1;</span>
-<span class="nc" id="L126">    }</span>
-<span class="fc" id="L127">}</span>
+<span class="fc" id="L166">    int x1=0;</span>
+<span class="fc bfc" id="L167" title="All 2 branches covered.">    for (Float y1: smoothedTerrainArray) {</span>
+<span class="fc" id="L168">        parent.fill(terrainColor);</span>
+<span class="fc" id="L169">        parent.rect(x1, y1*CELLSIZE, 1, (20-y1)*CELLSIZE);</span>
+<span class="fc" id="L170">        x1+=1;</span>
+<span class="fc" id="L171">    }</span>
+<span class="fc" id="L172">}</span>
 
 private static void drawTrees(PApplet parent, int x, int y, int CELLSIZE, PImage treesImage) {
-<span class="fc" id="L130">    xSize = (x*32)+16;</span>
-<span class="pc bpc" id="L131" title="1 of 2 branches missed.">    if (smoothedTerrainArray.size() &gt; xSize) {</span>
-<span class="nc" id="L132">        Float y1 = smoothedTerrainArray.get(xSize);</span>
-<span class="nc" id="L133">        yCoord = y1 * CELLSIZE + 2;</span>
-<span class="nc" id="L134">        parent.image(treesImage, x * CELLSIZE, yCoord-CELLSIZE, CELLSIZE, CELLSIZE);</span>
+<span class="fc" id="L175">    xSize = (x*32)+16;</span>
+<span class="fc bfc" id="L176" title="All 2 branches covered.">    if (smoothedTerrainArray.size() &gt; xSize) {</span>
+<span class="fc" id="L177">        Float y1 = smoothedTerrainArray.get(xSize);</span>
+<span class="fc" id="L178">        yCoord = y1 * CELLSIZE + 2;</span>
+<span class="pc bpc" id="L179" title="1 of 2 branches missed.">        if(treesImage!=null){</span>
+<span class="fc" id="L180">            parent.image(treesImage, x * CELLSIZE, yCoord-CELLSIZE, CELLSIZE, CELLSIZE);</span>
+        }
     } 
-<span class="fc" id="L136">}</span>
+<span class="fc" id="L183">}</span>
 
-private static void drawTanks(PApplet parent, char c, int x, int y, int[] playerColors, int CELLSIZE, List&lt;Float&gt; smoothedTerrainArray) {
-<span class="nc bnc" id="L139" title="All 8 branches missed.">    if (tanks.size() &lt; 5 &amp;&amp; !tankIds.contains(c) &amp;&amp; c &gt;= 'A' &amp;&amp; c &lt;= 'E') {</span>
-<span class="nc" id="L140">        tanksNum+=1;</span>
-        // System.out.println(tanks);
-        // System.out.println(tankIds);
-<span class="nc" id="L143">        Tank tank = new Tank(parent, c, playerColors, x, y, CELLSIZE, smoothedTerrainArray);</span>
-<span class="nc" id="L144">        tanks.add(tank);</span>
-<span class="nc" id="L145">        tankIds.add(c);</span>
+private static void drawTanks(PApplet parent, char c, int x, int y, int[] playerColors, int CELLSIZE, List&lt;Float&gt; smoothedTerrainArray, GUI GUI) {
+<span class="pc bpc" id="L186" title="2 of 8 branches missed.">    if (tanks.size() &lt; 5 &amp;&amp; !tankIds.contains(c) &amp;&amp; c &gt;= 'A' &amp;&amp; c &lt;= 'E') {</span>
+<span class="fc" id="L187">        tanksNum+=1;</span>
+<span class="fc" id="L188">        Tank tank = new Tank(parent, c, playerColors, x, y, CELLSIZE, smoothedTerrainArray, GUI);</span>
+<span class="fc" id="L189">        tanks.add(tank);</span>
+<span class="fc" id="L190">        tankIds.add(c);</span>
     } 
-<span class="nc" id="L147">}</span>
+<span class="fc" id="L192">}</span>
 public static void renderAllTanks(GUI GUI) {
-<span class="fc" id="L149">    int i=0;</span>
-<span class="fc bfc" id="L150" title="All 2 branches covered.">    for (Tank tank : tanks) {</span>
+<span class="fc" id="L194">    int i=0;</span>
+<span class="fc bfc" id="L195" title="All 2 branches covered.">    for (Tank tank : tanks) {</span>
         // System.out.println(tank.getInfo());
-<span class="fc" id="L152">        i+=1;</span>
-<span class="fc" id="L153">        tank.setGUI(GUI);</span>
-<span class="fc" id="L154">        tank.render(smoothedTerrainArray);</span>
-<span class="fc" id="L155">        tank.renderGUI(i);</span>
-<span class="fc" id="L156">    }</span>
-<span class="fc" id="L157">    i=0;</span>
-<span class="fc" id="L158">}</span>
+<span class="fc" id="L197">        i+=1;</span>
+<span class="pc bpc" id="L198" title="1 of 2 branches missed.">        if(tank.tankAlive) {</span>
+<span class="fc" id="L199">            tank.render(smoothedTerrainArray);</span>
+        } else {
+<span class="nc" id="L201">            tank.playerHealth = 0;</span>
+<span class="nc" id="L202">            tank.explodeTank();</span>
+        }
+<span class="fc" id="L204">        tank.renderGUI(i);</span>
+<span class="fc" id="L205">    }</span>
+<span class="fc" id="L206">    i=0;</span>
+<span class="fc" id="L207">}</span>
 public static List&lt;Tank&gt; getTanks() {
-<span class="fc" id="L160">    Collections.sort(tanks, Comparator.comparingInt(tank -&gt; tank.getC() - 'A'));</span>
-<span class="fc" id="L161">    return tanks;</span>
+<span class="fc" id="L209">    Collections.sort(tanks, Comparator.comparingInt(tank -&gt; tank.getC() - 'A'));</span>
+<span class="fc" id="L210">    return tanks;</span>
+}
+
+public static float[] getProjectiles() {
+<span class="fc" id="L214">    List&lt;float[]&gt; projectiles = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L215">    float[] latestProjectile ={0,0,0,0};</span>
+<span class="fc" id="L216">    float largestThirdElement = Float.NEGATIVE_INFINITY;</span>
+<span class="fc bfc" id="L217" title="All 2 branches covered.">    for (Tank tank : tanks) {</span>
+<span class="fc" id="L218">        float[] projectile=tank.getProjectile();</span>
+<span class="pc bpc" id="L219" title="1 of 2 branches missed.">        if(projectile!=null){</span>
+<span class="nc" id="L220">            projectiles.add(projectile);</span>
+        }
+<span class="fc" id="L222">    }</span>
+<span class="fc" id="L223">    float i = 0;</span>
+<span class="pc bpc" id="L224" title="1 of 2 branches missed.">    for (float[] projectile : projectiles) {</span>
+<span class="nc bnc" id="L225" title="All 2 branches missed.">        if (projectile[2] &gt; largestThirdElement) {</span>
+<span class="nc" id="L226">            largestThirdElement = projectile[2];</span>
+<span class="nc" id="L227">            latestProjectile = projectile;</span>
+<span class="nc" id="L228">            i++;</span>
+        }
+<span class="nc" id="L230">    }</span>
+<span class="fc" id="L231">    float[] bruh = new float[latestProjectile.length + 1];</span>
+<span class="fc bfc" id="L232" title="All 2 branches covered.">    for (int j = 0; j &lt; latestProjectile.length; j++) {</span>
+<span class="fc" id="L233">        bruh[j] = latestProjectile[j];</span>
+    }
+<span class="fc" id="L235">    bruh[bruh.length - 1] = i;</span>
+<span class="fc" id="L236">    return bruh;</span>
+}
+
+public static List&lt;Integer&gt; damageToScore(){
+<span class="fc" id="L240">    List&lt;Integer&gt; damageRecieved = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L241">    int totalDamage = 0;</span>
+<span class="fc" id="L242">    int whichTankShot = -1;</span>
+<span class="fc bfc" id="L243" title="All 2 branches covered.">    for (Tank tank : tanks) {</span>
+<span class="fc" id="L244">        totalDamage += tank.getDamageRecieved().get(0);</span>
+<span class="fc" id="L245">        whichTankShot = tank.getDamageRecieved().get(1);</span>
+<span class="fc" id="L246">    }</span>
+<span class="fc" id="L247">    damageRecieved.add(totalDamage);</span>
+<span class="fc" id="L248">    damageRecieved.add(whichTankShot);</span>
+<span class="fc" id="L249">    return damageRecieved;</span>
 }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

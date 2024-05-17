@@ -31,7 +31,7 @@ public class LevelRenderer {
     private static int xSize;
     private static int moveBy;
     public static int tanksNum;
-    private static Set<Character> tankIds = new HashSet<>();
+    public static Set<Character> tankIds = new HashSet<>();
 
     private static int ScreenY= App.HEIGHT;
     private static int ScreenX = App.WIDTH;
@@ -52,7 +52,7 @@ public class LevelRenderer {
     private int CELLSIZE;
     public GUI GUI;
 
-    private static List<Integer> tankScores = new ArrayList<>();
+    public static List<Integer> tankScores = new ArrayList<>();
 
     public LevelRenderer(PApplet parent, String[] levelLines, int[] playerColors, int terrainColor, PImage treesImage, int CELLSIZE, GUI GUI) {
         this.parent=parent;

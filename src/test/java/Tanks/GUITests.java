@@ -11,7 +11,7 @@ public class GUITests {
 
     private int[] playerColors = {0,0,0,};
     
-    public PApplet mockApplet = new PApplet(); // You may need to mock more behavior of PApplet depending on your needs
+    public PApplet mockApplet = new PApplet(); 
 
     public GUI setupGUITests(){
         GUI gui = new GUI(mockApplet);
@@ -68,5 +68,39 @@ public class GUITests {
         // Test if the player wind is displayed correctly
         GUI gui = setupGUITests();
         assertEquals(0, gui.playerWindForces[0]);
+    }
+    @Test
+    public void testSetPlayerDetails() {
+        GUI gui = setupGUITests();
+        gui.setPlayerDetails(200, 80, 60, 10, 5, 2);
+
+        assertEquals(200, gui.fuelAmounts[0]);
+        assertEquals(80, gui.playerHealths[0]);
+        assertEquals(60, gui.playerPowers[0]);
+        assertEquals(5, gui.playerWindForces[0]);
+        assertEquals(2, gui.playerParachutes[0]);
+    }
+
+    @Test
+    public void testSetPlayerScores() {
+        GUI gui = setupGUITests();
+        gui.setPlayerScores(1, 500, 90);
+
+        assertEquals(500, gui.playerScores[0]);
+        assertEquals(90, gui.playerHealths[0]);
+    }
+
+    @Test
+    public void testPlayersSetup() {
+        GUI gui = new GUI(mockApplet);
+        int[] colors = {255, 0, 0, 0, 255, 0};
+        gui.playersSetup(2, colors);
+
+        assertEquals(2, gui.fuelAmounts.length);
+        assertEquals(2, gui.playerHealths.length);
+        assertEquals(2, gui.playerPowers.length);
+        assertEquals(2, gui.playerScores.length);
+        assertEquals(2, gui.playerWindForces.length);
+        assertEquals(2, gui.playerParachutes.length);
     }
 }

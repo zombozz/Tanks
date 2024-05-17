@@ -8,38 +8,50 @@ public class SoundEffects {
     private AudioPlayer popSound;
     private AudioPlayer tankMoveSound;
     private AudioPlayer turretSound;
+    private AudioPlayer nextLevelSound;
+    private AudioPlayer gameOverSound;
 
     private PApplet parent;
     private int initialTime;
 
-<span class="fc" id="L15">    public SoundEffects(PApplet parent, Minim minim) {</span>
-<span class="fc" id="L16">        this.parent=parent;</span>
-<span class="fc" id="L17">        this.minim = minim;</span>
-<span class="fc" id="L18">        explosionSound = minim.loadFile(&quot;src\\main\\resources\\Tanks\\vine-boom.mp3&quot;);</span>
-<span class="fc" id="L19">        popSound = minim.loadFile(&quot;src\\main\\resources\\Tanks\\pop.mp3&quot;);</span>
-<span class="fc" id="L20">        tankMoveSound = minim.loadFile(&quot;src\\main\\resources\\Tanks\\tank.mp3&quot;);</span>
-<span class="fc" id="L21">        turretSound = minim.loadFile(&quot;src\\main\\resources\\Tanks\\turret.mp3&quot;);</span>
-<span class="fc" id="L22">        initialTime = parent.millis();</span>
-<span class="fc" id="L23">    }</span>
+<span class="fc" id="L17">    public SoundEffects(PApplet parent, Minim minim) {</span>
+<span class="fc" id="L18">        this.parent=parent;</span>
+<span class="fc" id="L19">        this.minim = minim;</span>
+<span class="fc" id="L20">        explosionSound = minim.loadFile(&quot;src\\main\\resources\\Tanks\\vine-boom.mp3&quot;);</span>
+<span class="fc" id="L21">        popSound = minim.loadFile(&quot;src\\main\\resources\\Tanks\\pop.mp3&quot;);</span>
+<span class="fc" id="L22">        tankMoveSound = minim.loadFile(&quot;src\\main\\resources\\Tanks\\tank.mp3&quot;);</span>
+<span class="fc" id="L23">        turretSound = minim.loadFile(&quot;src\\main\\resources\\Tanks\\turret.mp3&quot;);</span>
+<span class="fc" id="L24">        nextLevelSound = minim.loadFile(&quot;src\\main\\resources\\Tanks\\whoosh.mp3&quot;);</span>
+<span class="fc" id="L25">        gameOverSound = minim.loadFile(&quot;src\\main\\resources\\Tanks\\game-over3.mp3&quot;);</span>
+<span class="fc" id="L26">        initialTime = parent.millis();</span>
+<span class="fc" id="L27">    }</span>
     public void playExplosionSound() {
-        // explosionSound.rewind();
-        // explosionSound.play();
-<span class="nc" id="L27">    }</span>
-    public void playPopSound() {
-<span class="nc" id="L29">        popSound.rewind();</span>
-<span class="nc" id="L30">        popSound.play();</span>
+<span class="nc" id="L29">        explosionSound.rewind();</span>
+<span class="nc" id="L30">        explosionSound.play();</span>
 <span class="nc" id="L31">    }</span>
-    public void playTankMoveSound() {
-        // tankMoveSound.rewind();
-        // tankMoveSound.play();
+    public void playPopSound() {
+<span class="nc" id="L33">        popSound.rewind();</span>
+<span class="nc" id="L34">        popSound.play();</span>
 <span class="nc" id="L35">    }</span>
-    public void playTurretSound() {
-        // turretSound.rewind();
-        // turretSound.play();
+    public void playTankMoveSound() {
+<span class="nc" id="L37">        tankMoveSound.rewind();</span>
+<span class="nc" id="L38">        tankMoveSound.play();</span>
 <span class="nc" id="L39">    }</span>
-    public void stopTankMoveSound() {
-        // tankMoveSound.pause();
-        // tankMoveSound.rewind();
+    public void playTurretSound() {
+<span class="nc" id="L41">        turretSound.rewind();</span>
+<span class="nc" id="L42">        turretSound.play();</span>
 <span class="nc" id="L43">    }</span>
+    public void stopTankMoveSound() {
+<span class="nc" id="L45">        tankMoveSound.pause();</span>
+<span class="nc" id="L46">        tankMoveSound.rewind();</span>
+<span class="nc" id="L47">    }</span>
+    public void playNextLevelSound() {
+<span class="fc" id="L49">        nextLevelSound.rewind();</span>
+<span class="fc" id="L50">        nextLevelSound.play();</span>
+<span class="fc" id="L51">    }</span>
+    public void playGameOverSound() {
+<span class="fc" id="L53">        gameOverSound.rewind();</span>
+        // gameOverSound.play();
+<span class="fc" id="L55">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

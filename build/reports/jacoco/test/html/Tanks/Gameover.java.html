@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Gameover.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tanks_scaffold</a> &gt; <a href="index.source.html" class="el_package">Tanks</a> &gt; <span class="el_source">Gameover.java</span></div><h1>Gameover.java</h1><pre class="source lang-java linenums">package Tanks;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import processing.core.PApplet;
+
+public class Gameover {
+<span class="fc" id="L10">    public Gameover(PApplet parent, List&lt;Integer&gt; tankScores) {</span>
+<span class="fc" id="L11">        int w = App.WIDTH;</span>
+<span class="fc" id="L12">        int h = App.HEIGHT;</span>
+<span class="fc" id="L13">        int pt = 10;</span>
+
+<span class="fc" id="L15">        int[] playerColors = {</span>
+<span class="fc" id="L16">            parent.color(0, 0, 255),  </span>
+<span class="fc" id="L17">            parent.color(255, 0, 0), </span>
+<span class="fc" id="L18">            parent.color(0, 255, 255),  </span>
+<span class="fc" id="L19">            parent.color(255, 255, 0), </span>
+<span class="fc" id="L20">            parent.color(0, 255, 0),</span>
+        };
+
+<span class="fc" id="L23">        Map&lt;Character, Integer&gt; tankScoresMap = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L24">        char c = 'A';</span>
+<span class="fc bfc" id="L25" title="All 2 branches covered.">        for (Integer score : tankScores) {</span>
+<span class="fc" id="L26">            tankScoresMap.put(c, score);</span>
+<span class="fc" id="L27">            c++;</span>
+<span class="fc" id="L28">        }</span>
+
+<span class="fc" id="L30">        char winner = getWinner(tankScoresMap);</span>
+<span class="fc" id="L31">        int centerWidth = w/2-40;</span>
+<span class="fc" id="L32">        parent.fill(255);</span>
+<span class="fc" id="L33">        parent.textSize(30);</span>
+<span class="fc" id="L34">        parent.text(&quot;Player &quot; + winner + &quot; wins!&quot;, centerWidth-40, h / 3-10);</span>
+<span class="fc" id="L35">        parent.fill(playerColors[winner-65], 50);</span>
+<span class="fc" id="L36">        parent.rect(centerWidth-30, h / 3, 180, 170);</span>
+<span class="fc" id="L37">        parent.textSize(20);</span>
+<span class="fc" id="L38">        pt += 50;</span>
+<span class="fc" id="L39">        parent.fill(255);</span>
+<span class="fc" id="L40">        parent.text(&quot;Final Scores:&quot;, centerWidth-5, h / 3+30);</span>
+<span class="fc" id="L41">        parent.textSize(16);</span>
+
+        // Sort tank scores in descending order
+<span class="fc" id="L44">        List&lt;Character&gt; tankKeys = sortScoresDescending(tankScoresMap);</span>
+        
+        // Display scores with a delay of 0.7s
+
+<span class="fc" id="L48">        parent.fill(255);</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        for (int i = 0; i &lt; tankKeys.size(); i++) {</span>
+<span class="fc" id="L50">            int startTime = parent.millis();</span>
+<span class="fc" id="L51">            char tank = tankKeys.get(i);</span>
+<span class="fc" id="L52">            int score = tankScoresMap.get(tank);</span>
+<span class="fc" id="L53">            String playerName = &quot;Player &quot; + tank;</span>
+<span class="fc" id="L54">            String scoreText = playerName + &quot;: &quot; + score;</span>
+<span class="fc" id="L55">            int delay = 1000; // Delay in milliseconds</span>
+<span class="fc" id="L56">            displayScoreWithDelay(parent, scoreText, centerWidth, h / 2 - 100 + pt, delay, i, startTime);</span>
+<span class="fc" id="L57">            pt += 30;</span>
+        }
+
+<span class="fc" id="L60">        parent.text(&quot;Press 'r' to restart&quot;, centerWidth-5, h * 5 / 6);</span>
+<span class="fc" id="L61">    }</span>
+
+    public char getWinner(Map&lt;Character, Integer&gt; tankScoresMap) {
+<span class="fc" id="L64">        char winner = 'A';</span>
+<span class="fc" id="L65">        int maxScore = Integer.MIN_VALUE;</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">        for (Map.Entry&lt;Character, Integer&gt; entry : tankScoresMap.entrySet()) {</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">            if (entry.getValue() &gt; maxScore) {</span>
+<span class="fc" id="L68">                maxScore = entry.getValue();</span>
+<span class="fc" id="L69">                winner = entry.getKey();</span>
+            }
+<span class="fc" id="L71">        }</span>
+<span class="fc" id="L72">        return winner;</span>
+    }
+
+    // Method to sort tank scores in descending order
+    public List&lt;Character&gt; sortScoresDescending(Map&lt;Character, Integer&gt; tankScoresMap) {
+<span class="fc" id="L77">        List&lt;Character&gt; tankKeys = new ArrayList&lt;&gt;(tankScoresMap.keySet());</span>
+<span class="fc" id="L78">        tankKeys.sort((t1, t2) -&gt; tankScoresMap.get(t2) - tankScoresMap.get(t1));</span>
+<span class="fc" id="L79">        return tankKeys;</span>
+    }
+
+    // Method to display score with delay
+    public void displayScoreWithDelay(PApplet parent, String scoreText, int x, int y, int delay, int index, int startTime) {
+<span class="fc" id="L84">        parent.fill(255); // Set text color to white</span>
+        // if (startTime &gt; delay * (index + 1)) {
+<span class="fc" id="L86">            parent.text(scoreText, x, y);</span>
+        // }
+<span class="fc" id="L88">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

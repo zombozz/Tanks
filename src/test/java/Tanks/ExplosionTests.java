@@ -26,8 +26,6 @@ public class ExplosionTests {
     public void testExplode() {
         // Test the Explode method
         Explosion explosion = new Explosion(mockApplet, 100, 100, 0, new SoundEffects(mockApplet, null));
-
-        
         // Call the Explode method
         try{
             explosion.Explode();

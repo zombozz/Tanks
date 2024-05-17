@@ -9,7 +9,7 @@ import processing.core.PImage;
 public class Tank {
     private PApplet parent;
     public char c;
-    private int[] colors;
+    public int[] colors;
     private int x;
     private float y;
     private int CELLSIZE;
@@ -21,17 +21,17 @@ public class Tank {
     private Projectile projectile;
     private float rotationAngle;
 
-    private float tankX;
-    private float tankY;
-    private float previousTankX;
-    private float previousTankY;
+    public float tankX;
+    public float tankY;
+    public float previousTankX;
+    public float previousTankY;
     private float y1;
     
-<span class="fc" id="L30">    private int playerFuel = 250;</span>
-<span class="fc" id="L31">    private int playerHealth = 100;</span>
-<span class="fc" id="L32">    private int playerPower = 50;</span>
-<span class="fc" id="L33">    private int playerScore = 0;</span>
-<span class="fc" id="L34">    private int windForce = (int) (Math.random() *(35+35) -35);</span>
+<span class="fc" id="L30">    public int playerFuel = 250;</span>
+<span class="fc" id="L31">    public int playerHealth = 100;</span>
+<span class="fc" id="L32">    public int playerPower = 50;</span>
+<span class="fc" id="L33">    public int playerScore = 100;</span>
+<span class="fc" id="L34">    public int windForce = (int) (Math.random() *(35+35) -35);</span>
 
 <span class="fc" id="L36">    private int playerNum = 0;</span>
 <span class="fc" id="L37">    private int i = 0;</span>
@@ -41,156 +41,295 @@ public class Tank {
     private float[] explosionCoords;
     private float[] oldExplosionCoords;
 
-    private List&lt;Projectile&gt; projectiles;
+    public List&lt;Projectile&gt; projectiles;
 
     private Minim minim;
     private SoundEffects soundEffects;
+<span class="fc" id="L48">    private PImage parachuteImage = App.parachuteImage;</span>
 
-    private boolean isFalling;
-    private boolean moveTankCalled;
-<span class="fc" id="L51">    private PImage parachuteImage = App.parachuteImage;</span>
+<span class="fc" id="L50">    private boolean parachuteActive = false;</span>
+<span class="fc" id="L51">    private int parachuteStartTime = 0;</span>
+<span class="fc" id="L52">    public int parachutesRemaining = 3;</span>
 
-<span class="fc" id="L53">    public Tank(PApplet parent, char c, int[] colors, int x, float y, int size, List&lt;Float&gt; smoothedTerrainArray) {</span>
-<span class="fc" id="L54">        projectiles = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L55">        this.parent = parent;</span>
-<span class="fc" id="L56">        this.c = c;</span>
-<span class="fc" id="L57">        this.colors = colors;</span>
-<span class="fc" id="L58">        this.x = x;</span>
-<span class="fc" id="L59">        this.y = y;</span>
-<span class="fc" id="L60">        this.CELLSIZE = size;</span>
-<span class="fc" id="L61">        this.smoothedTerrainArray = smoothedTerrainArray;</span>
-<span class="fc" id="L62">        minim = new Minim(parent);</span>
-<span class="fc" id="L63">        soundEffects = new SoundEffects(parent, minim);</span>
-<span class="fc" id="L64">    }</span>
-    public void setGUI(GUI GUI){
-<span class="fc" id="L66">        this.GUI=GUI;</span>
-<span class="fc" id="L67">    }</span>
+<span class="fc" id="L54">    private boolean tankFalling = false;</span>
+
+<span class="fc" id="L56">    private boolean drawArrow = false;</span>
+<span class="fc" id="L57">    private int arrowStartTime = 0;</span>
+    private PImage arrowImage;
+    
+<span class="fc" id="L60">    public boolean tankAlive = true;</span>
+<span class="fc" id="L61">    public boolean tankExploded = false;</span>
+
+    private Explosion explosion;
+<span class="fc" id="L64">    private List&lt;Tank&gt; tanks = App.tanks;</span>
+<span class="fc" id="L65">    public List&lt;Integer&gt; damageReceived = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L66">    private float[] latestProjectilesCoords = App.latestProjectile;</span>
+    
+    private int whichTankShot;
+
+<span class="fc" id="L70">    private float damage = 0;</span>
+
+
+<span class="fc" id="L73">    private boolean finalHealthAdded = false;</span>
+<span class="fc" id="L74">    public Tank(PApplet parent, char c, int[] colors, int x, float y, int size, List&lt;Float&gt; smoothedTerrainArray, GUI GUI) {</span>
+<span class="fc" id="L75">        projectiles = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L76">        this.parent = parent;</span>
+<span class="fc" id="L77">        this.c = c;</span>
+<span class="fc" id="L78">        this.colors = colors;</span>
+<span class="fc" id="L79">        this.x = x;</span>
+<span class="fc" id="L80">        this.y = y;</span>
+<span class="fc" id="L81">        this.CELLSIZE = size;</span>
+<span class="fc" id="L82">        this.smoothedTerrainArray = smoothedTerrainArray;</span>
+<span class="fc" id="L83">        this.GUI=GUI;</span>
+
+<span class="fc" id="L85">        minim = new Minim(parent);</span>
+<span class="fc" id="L86">        soundEffects = new SoundEffects(parent, minim);</span>
+<span class="fc" id="L87">    }</span>
+
+    public float[] getProjectile(){
+        try {
+<span class="nc" id="L91">            return projectile.getExplosionCoords();</span>
+<span class="fc" id="L92">        } catch (NullPointerException e) {</span>
+<span class="fc" id="L93">            return null;</span>
+        }
+    }
     public void checkDamage(){
-        
+<span class="fc" id="L97">        damage = 0;</span>
+<span class="fc" id="L98">        latestProjectilesCoords = App.latestProjectile;</span>
+<span class="fc" id="L99">        whichTankShot = Math.round(latestProjectilesCoords[3]);</span>
         try{
-<span class="fc" id="L71">            oldExplosionCoords = explosionCoords;</span>
-<span class="nc" id="L72">            explosionCoords = projectile.getExplosionCoords();</span>
-<span class="nc bnc" id="L73" title="All 2 branches missed.">            if(!(oldExplosionCoords[0]==explosionCoords[0])){</span>
-
-<span class="nc" id="L75">                float explosionX = explosionCoords[0];</span>
-<span class="nc" id="L76">                float explosionY = explosionCoords[1];</span>
-<span class="nc" id="L77">                float distanceSquared = (x - explosionX) * (x - explosionX) + (y - explosionY) * (y - explosionY);</span>
-<span class="nc" id="L78">                float distance = parent.sqrt(distanceSquared);</span>
-<span class="nc" id="L79">                int explosionRadius =30;</span>
-<span class="nc bnc" id="L80" title="All 2 branches missed.">                 if (distance &lt;= explosionRadius) {</span>
-                // Calculate damage based on distance
-<span class="nc" id="L82">                float maxDamage = 60; // Maximum damage at 0 distance</span>
-<span class="nc" id="L83">                float damage = maxDamage * (1 - distance / explosionRadius);</span>
-
-                // Reduce player health based on damage
-<span class="nc" id="L86">                playerHealth -= damage;</span>
-                
-                // Ensure playerHealth doesn't go below zero
-<span class="nc bnc" id="L89" title="All 2 branches missed.">                if (playerHealth &lt; 0) {</span>
-<span class="nc" id="L90">                    playerHealth = 0;</span>
-                }
+<span class="fc" id="L101">            oldExplosionCoords = explosionCoords;</span>
+<span class="fc" id="L102">            explosionCoords = latestProjectilesCoords;</span>
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">            if(!(oldExplosionCoords[0]==explosionCoords[0])){</span>
+<span class="nc" id="L104">                float explosionX = explosionCoords[0];</span>
+<span class="nc" id="L105">                float explosionY = explosionCoords[1];</span>
+<span class="nc" id="L106">                float distanceSquared = (tankX - explosionX) * (tankX - explosionX) + (tankY - explosionY) * (tankY - explosionY);</span>
+<span class="nc" id="L107">                float distance = parent.sqrt(distanceSquared); </span>
+<span class="nc" id="L108">                int explosionRadius =40;</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">                if (distance &lt;= explosionRadius) {</span>
+<span class="nc" id="L110">                float maxDamage = 60; </span>
+<span class="nc" id="L111">                damage = maxDamage * (1 - distance / explosionRadius);</span>
+<span class="nc" id="L112">                playerHealth -= damage;</span>
+<span class="nc" id="L113">                System.out.println(damage);</span>
             }
+        } 
+<span class="fc" id="L116">    }catch (NullPointerException  | IndexOutOfBoundsException e){}</span>
+<span class="fc" id="L117">    }</span>
+
+    public List&lt;Integer&gt; getDamageRecieved() {
+        // List&lt;Integer&gt; damageReceived = new ArrayList&lt;&gt;();
+<span class="fc" id="L121">        damageReceived = new ArrayList&lt;&gt;();</span>
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">        if(!finalHealthAdded){</span>
+<span class="fc" id="L123">            System.out.println(whichTankShot + &quot; &quot; + App.selectedTankIndex);</span>
+<span class="pc bpc" id="L124" title="1 of 2 branches missed.">            if(whichTankShot != App.selectedTankIndex-1){</span>
+<span class="fc" id="L125">                damageReceived.add(Math.round(damage));</span>
+            } else {
+<span class="nc" id="L127">                damageReceived.add(0);</span>
             }
-<span class="pc" id="L94">        } catch (NullPointerException e){}</span>
-<span class="fc" id="L95">    }</span>
-    public char getC(){
-<span class="fc" id="L97">        return c;</span>
+<span class="fc" id="L129">            damageReceived.add(whichTankShot);</span>
+<span class="pc bpc" id="L130" title="1 of 2 branches missed.">            if(playerHealth==0){</span>
+<span class="nc" id="L131">                finalHealthAdded = true;</span>
+            }
+<span class="fc" id="L133">            return damageReceived;</span>
+        } else {
+<span class="nc" id="L135">            damageReceived.add(0);</span>
+<span class="nc" id="L136">            damageReceived.add(whichTankShot);</span>
+<span class="nc" id="L137">            return damageReceived;</span>
+        }
     }
-    public float getTankMovement(){
-<span class="nc" id="L100">        return moveTankBy;</span>
-    }
-    public float getY(){
-<span class="nc" id="L103">        return tankY;</span>
-    }
-    public void setPlayerNum(int playerNum){
-<span class="nc" id="L106">        this.playerNum = playerNum;</span>
-<span class="nc" id="L107">    }</span>
 
     public void checkIfTankFall() {
-<span class="nc bnc" id="L110" title="All 6 branches missed.">        if (!moveTankCalled &amp;&amp; tankY &gt; previousTankY &amp;&amp; tankX == previousTankX) {</span>
-<span class="nc" id="L111">            isFalling = true;</span>
-            // parent.image(parachuteImage, tankX, tankY, 32, 32);
+        int fallingStartTime;
+<span class="pc bpc" id="L143" title="2 of 6 branches missed.">        if (parachutesRemaining&gt;0 &amp;&amp; tankY &gt; previousTankY &amp;&amp; tankX == previousTankX) {</span>
+<span class="nc" id="L144">            parachuteActive = true;</span>
+<span class="nc" id="L145">            parachuteStartTime = parent.millis();</span>
+<span class="pc bpc" id="L146" title="5 of 6 branches missed.">        } else if (parachutesRemaining==0 &amp;&amp; tankY &gt; previousTankY &amp;&amp; tankX == previousTankX) {</span>
+<span class="nc" id="L147">            tankFalling = true;</span>
+        }
+<span class="pc bpc" id="L149" title="1 of 2 branches missed.">        if (parachuteActive) {</span>
+<span class="nc" id="L150">            tankFalling=true;</span>
+<span class="nc" id="L151">            parent.image(parachuteImage, tankX - 16, tankY - 40, 32, 32);</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">            if (parent.millis() - parachuteStartTime &gt; 50) {</span>
+<span class="nc" id="L153">                parachutesRemaining-=1;</span>
+<span class="nc" id="L154">                parachuteActive = false;</span>
+            } 
+        }
+<span class="fc" id="L157">        previousTankX = tankX;</span>
+<span class="fc" id="L158">        previousTankY = tankY;</span>
+<span class="fc" id="L159">    }</span>
+
+    public void moveTank(int moveTankBy) {
+        
+<span class="nc bnc" id="L163" title="All 6 branches missed.">        if(tankAlive &amp;&amp; (tankX+moveTankBy &gt; 0) &amp;&amp; (tankX+moveTankBy &lt; App.WIDTH)) {</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">            if(playerFuel&gt;0){</span>
+<span class="nc" id="L165">                soundEffects.playTankMoveSound();</span>
+<span class="nc" id="L166">                this.moveTankBy+=moveTankBy;</span>
+<span class="nc" id="L167">                this.playerFuel-=1;</span>
+            }
         } else {
-<span class="nc" id="L114">            isFalling = false;</span>
+<span class="nc" id="L170">            tankAlive = false;</span>
+<span class="nc" id="L171">            int explosionInitialTime = parent.millis();</span>
+<span class="nc" id="L172">            explosion = new Explosion(parent, tankX, tankY, explosionInitialTime, soundEffects);</span>
         }
-<span class="nc" id="L116">        previousTankX = tankX;</span>
-<span class="nc" id="L117">        previousTankY = tankY;</span>
-<span class="nc" id="L118">        moveTankCalled = false; </span>
-<span class="nc" id="L119">        parent.image(parachuteImage, tankX-16, tankY-40, 32, 32);</span>
+<span class="nc" id="L174">        render(smoothedTerrainArray);</span>
+<span class="nc" id="L175">    }</span>
 
-<span class="nc" id="L121">    }</span>
-
-    public void moveTank(int moveTank) {
-<span class="nc bnc" id="L124" title="All 2 branches missed.">        if(playerFuel&gt;0){</span>
-<span class="nc" id="L125">            soundEffects.playTankMoveSound();</span>
-<span class="nc" id="L126">            this.moveTankBy+=moveTank;</span>
-<span class="nc" id="L127">            this.playerFuel-=1;</span>
-        }
-<span class="nc" id="L129">        render(smoothedTerrainArray);</span>
-<span class="nc" id="L130">        moveTankCalled=true;</span>
-<span class="nc" id="L131">    }</span>
     public void stopTankMoveSound(){
-<span class="nc" id="L133">        soundEffects.stopTankMoveSound();</span>
-<span class="nc" id="L134">    }</span>
+<span class="nc" id="L178">        soundEffects.stopTankMoveSound();</span>
+<span class="nc" id="L179">    }</span>
+
+    public void changePower(int power){
+<span class="nc" id="L182">        playerPower+=power;</span>
+<span class="nc bnc" id="L183" title="All 2 branches missed.">        if(playerPower &gt; playerHealth){</span>
+<span class="nc" id="L184">            playerPower=playerHealth;</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">        } else if(playerPower&lt;0) {</span>
+<span class="nc" id="L186">            playerPower=0;</span>
+        }
+<span class="nc" id="L188">    }</span>
+
+    public void setScore(int playerScore){
+<span class="fc" id="L191">        this.playerScore=playerScore;</span>
+<span class="fc" id="L192">    }</span>
+    public void addScore(int playerScore){
+<span class="nc" id="L194">        this.playerScore+=playerScore;</span>
+<span class="nc" id="L195">    }</span>
+    
+    public void explodeTank(){
+<span class="nc" id="L198">        explosion.Explode();</span>
+<span class="nc" id="L199">    }</span>
+
+    public int tankReset(){
+<span class="nc" id="L202">        return playerScore;</span>
+    }
+
     public void moveTurret(int moveTurret) {
-<span class="nc" id="L136">        soundEffects.playTurretSound();</span>
-<span class="nc" id="L137">        this.moveTurretBy+=moveTurret;</span>
-<span class="nc" id="L138">        render(smoothedTerrainArray);</span>
-<span class="nc" id="L139">    }</span>
+<span class="nc" id="L206">        soundEffects.playTurretSound();</span>
+<span class="nc" id="L207">        this.moveTurretBy+=moveTurret;</span>
+<span class="nc" id="L208">        render(smoothedTerrainArray);</span>
+<span class="nc" id="L209">    }</span>
 
     public void shootTurret() {
-<span class="nc" id="L142">        float projectileSpeed = 50; // Set the speed of the projectile</span>
-<span class="nc" id="L143">        projectile = new Projectile(parent, tankX, tankY - 10, projectileSpeed, CELLSIZE, moveTurretBy, smoothedTerrainArray,soundEffects);</span>
-<span class="nc" id="L144">        projectiles.add(projectile);</span>
-<span class="nc" id="L145">        windForce+=(int) (Math.random() *(10) -5);</span>
-<span class="nc" id="L146">    }</span>
+<span class="fc" id="L212">        float projectileSpeed = playerPower; // Set the speed of the projectile</span>
+<span class="nc" id="L213">        projectile = new Projectile(parent, tankX, tankY - 10, projectileSpeed, CELLSIZE, moveTurretBy, smoothedTerrainArray,soundEffects, windForce);</span>
+<span class="nc" id="L214">        projectiles.add(projectile);</span>
+<span class="nc" id="L215">        windForce+=(int) (Math.random() *(10) -5);</span>
+<span class="nc" id="L216">    }</span>
 
     public void renderGUI(int i){
-        // System.out.println(playerHealth);
-<span class="fc bfc" id="L150" title="All 2 branches covered.">        if(GUI.getCurrentPlayerIndex()+1 ==i){</span>
-<span class="fc" id="L151">            GUI.setPlayerDetails(playerFuel, playerHealth, playerPower, playerScore, windForce);</span>
-        }
-<span class="fc" id="L153">    }</span>
+<span class="fc bfc" id="L219" title="All 2 branches covered.">        if(GUI.getCurrentPlayerIndex()+1 ==i){</span>
+<span class="fc" id="L220">            GUI.setPlayerDetails(playerFuel, playerHealth, playerPower, playerScore, windForce, parachutesRemaining);</span>
+        } 
+<span class="fc" id="L222">        GUI.setPlayerScores(i, playerScore, playerHealth);</span>
+<span class="fc" id="L223">    }</span>
     
     public void render(List&lt;Float&gt; smoothedTerrainArray) {
-<span class="fc" id="L156">        checkDamage();</span>
-<span class="fc" id="L157">        this.smoothedTerrainArray = smoothedTerrainArray;</span>
-<span class="fc" id="L158">        int xSize = (x*32) + moveTankBy;</span>
-<span class="pc bpc" id="L159" title="1 of 2 branches missed.">        if  (smoothedTerrainArray.size() &gt; xSize) {</span>
-<span class="nc" id="L160">            y1 = smoothedTerrainArray.get(xSize);</span>
+        // System.out.println(playerScore);
+<span class="pc bpc" id="L227" title="1 of 2 branches missed.">        if(tankAlive){</span>
+<span class="fc" id="L228">        checkDamage();</span>
+<span class="fc" id="L229">        this.smoothedTerrainArray = smoothedTerrainArray;</span>
+<span class="fc" id="L230">        int xSize = (x*32) + moveTankBy;</span>
+<span class="fc bfc" id="L231" title="All 2 branches covered.">        if  (smoothedTerrainArray.size() &gt; xSize) {</span>
+<span class="fc" id="L232">            y1 = smoothedTerrainArray.get(xSize);</span>
             // tank movement
-<span class="nc" id="L162">            int index = c - 'A'; </span>
-<span class="nc" id="L163">            tankX = x * CELLSIZE + moveTankBy;</span>
-<span class="nc" id="L164">            tankY = y1 * CELLSIZE;</span>
-<span class="nc" id="L165">            checkIfTankFall();</span>
+<span class="fc" id="L234">            int index = c - 'A'; </span>
+<span class="fc" id="L235">            tankX = x * CELLSIZE + moveTankBy;</span>
+<span class="pc bpc" id="L236" title="5 of 6 branches missed.">            if(tankFalling &amp;&amp; tankY &lt; (y1 * CELLSIZE) &amp;&amp; parachutesRemaining &gt; 0){</span>
+<span class="nc" id="L237">                tankY+=0.5;</span>
+<span class="pc bpc" id="L238" title="5 of 6 branches missed.">            } else if (tankFalling &amp;&amp; tankY &lt; (y1 * CELLSIZE) &amp;&amp; parachutesRemaining ==0){</span>
+<span class="nc" id="L239">                tankY+=1;</span>
+<span class="nc" id="L240">                playerHealth-=0.2;</span>
+            } else{
+<span class="fc" id="L242">                tankY = y1 * CELLSIZE;</span>
+<span class="fc" id="L243">                tankFalling = false;</span>
+            }
+<span class="pc bpc" id="L245" title="2 of 4 branches missed.">            if (playerHealth &lt; 0 || playerHealth==0) {</span>
+<span class="nc" id="L246">                playerHealth = 0;</span>
+<span class="nc" id="L247">                tankAlive=false;</span>
+<span class="nc" id="L248">                int explosionInitialTime = parent.millis();</span>
+<span class="nc" id="L249">                explosion = new Explosion(parent, tankX, tankY, explosionInitialTime, soundEffects);</span>
+            }
+<span class="fc" id="L251">            checkIfTankFall();</span>
             // tank shape
-<span class="nc" id="L167">            parent.fill(colors[index]);</span>
-<span class="nc" id="L168">            parent.ellipse(tankX, tankY, CELLSIZE, CELLSIZE/2);</span>
-<span class="nc" id="L169">            parent.ellipse(tankX, tankY-10, CELLSIZE/2, CELLSIZE/4);</span>
-<span class="nc" id="L170">            parent.fill(0);</span>
+<span class="fc" id="L253">            parent.fill(colors[index]);</span>
+<span class="fc" id="L254">            parent.ellipse(tankX, tankY, CELLSIZE, CELLSIZE/2);</span>
+<span class="fc" id="L255">            parent.ellipse(tankX, tankY-10, CELLSIZE/2, CELLSIZE/4);</span>
+<span class="fc" id="L256">            parent.fill(0);</span>
             // turret movement
-<span class="nc" id="L172">            parent.pushMatrix();</span>
-<span class="nc" id="L173">            parent.translate(tankX, tankY-10);</span>
-<span class="nc" id="L174">            rotationAngle = PApplet.radians(moveTurretBy);</span>
-<span class="nc" id="L175">            parent.rotate(rotationAngle);</span>
-<span class="nc" id="L176">            parent.ellipse(0, -6, CELLSIZE/8, CELLSIZE/2);</span>
-<span class="nc" id="L177">            parent.popMatrix();</span>
+<span class="fc" id="L258">            parent.pushMatrix();</span>
+<span class="fc" id="L259">            parent.translate(tankX, tankY-10);</span>
+<span class="fc" id="L260">            rotationAngle = PApplet.radians(moveTurretBy);</span>
+<span class="fc" id="L261">            parent.rotate(rotationAngle);</span>
+<span class="fc" id="L262">            parent.ellipse(0, -6, CELLSIZE/8, CELLSIZE/2);</span>
+<span class="fc" id="L263">            parent.popMatrix();</span>
             try {
-<span class="nc bnc" id="L179" title="All 2 branches missed.">                if (!projectile.isNull) {</span>
-<span class="nc" id="L180">                    projectile.update(); </span>
-<span class="nc" id="L181">                    projectile.display();</span>
+<span class="nc bnc" id="L265" title="All 2 branches missed.">                if (!projectile.isNull) {</span>
+<span class="nc" id="L266">                    projectile.update(); </span>
+<span class="nc" id="L267">                    projectile.display();</span>
                 }
-<span class="nc" id="L183">            } catch (NullPointerException e)  {</span>
+<span class="fc" id="L269">            } catch (NullPointerException e)  {</span>
 
-<span class="nc" id="L185">            }</span>
+<span class="nc" id="L271">            }</span>
+
+<span class="pc bpc" id="L273" title="1 of 2 branches missed.">            if (drawArrow) {</span>
+<span class="nc bnc" id="L274" title="All 2 branches missed.">                if (parent.millis() - arrowStartTime &lt; 2000) {</span>
+<span class="nc" id="L275">                    parent.image(arrowImage, tankX - 16, tankY - 50, 32, 32);</span>
+                } else {
+<span class="nc" id="L277">                    drawArrow = false;</span>
+                }
+            }
+<span class="pc bpc" id="L280" title="1 of 2 branches missed.">            if(playerPower &gt; playerHealth){</span>
+<span class="nc" id="L281">                playerPower=playerHealth;</span>
+            }
         }
-<span class="fc" id="L187">    }</span>
+        }
+<span class="fc" id="L285">    }</span>
+    public char getC(){
+<span class="fc" id="L287">        return c;</span>
+    }
+    public float getTankMovement(){
+<span class="nc" id="L290">        return moveTankBy;</span>
+    }
+    public float getY(){
+<span class="nc" id="L293">        return tankY;</span>
+    }
+    public void setPlayerNum(int playerNum){
+<span class="nc" id="L296">        this.playerNum = playerNum;</span>
+<span class="nc" id="L297">    }</span>
 
+    public void drawTankArrow(PImage arrowImage){
+<span class="nc" id="L300">        this.arrowImage = arrowImage;</span>
+<span class="nc" id="L301">        drawArrow = true;</span>
+<span class="nc" id="L302">        arrowStartTime = parent.millis();</span>
+<span class="nc" id="L303">    }</span>
+    public String getInfo() {
+<span class="nc" id="L305">        String bruh = c + &quot;  &quot;+ Integer.toString(x) +  &quot;  &quot;+ Float.toString(y);</span>
+<span class="nc" id="L306">        return bruh;</span>
+    }
 
-    // public String getInfo() {
-    //     String bruh = Integer.toString(c) + &quot;  &quot;+ Integer.toString(x) +  &quot;  &quot;+ Float.toString(y);
-    //     return bruh;
-    // }
+    public void takeDamage(int damage) {
+<span class="fc" id="L310">        playerHealth -= damage;</span>
+<span class="fc" id="L311">    }</span>
+    public void heal(int health) {
+<span class="fc" id="L313">        playerHealth+=health;</span>
+<span class="fc" id="L314">    }</span>
+    public void setHealth(int health) {
+<span class="nc" id="L316">        playerHealth=health;</span>
+<span class="nc" id="L317">    }</span>
+    public void setFuel(int fuel) {
+<span class="nc" id="L319">        playerFuel+=fuel;</span>
+<span class="nc" id="L320">    }</span>
+    public int getHealth() {
+<span class="fc" id="L322">        return playerHealth;</span>
+    }
+    public int getScore() {
+<span class="nc" id="L325">        return playerScore;</span>
+    }
+    public int getFuel() {
+<span class="nc" id="L328">        return playerFuel;</span>
+    }
+    public int[] getColor() {
+<span class="fc" id="L331">        return colors;</span>
+    }
 }
 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -9,48 +9,55 @@ public class Explosion {
     private float x;
     private float y;
     private int CELLSIZE;
-
-<span class="fc" id="L13">    private int explosionRadius = 60;</span>
+    public SoundEffects soundEffects;
+<span class="nc" id="L13">    private int explosionRadius = 60;</span>
 
     private int explosionInitialTime;
 
-<span class="fc" id="L17">    public Explosion(PApplet parent, float x, float y, int explosionInitialTime) {</span>
-<span class="fc" id="L18">        this.parent=parent;</span>
-<span class="fc" id="L19">        this.x = x;</span>
-<span class="fc" id="L20">        this.y = y;</span>
-<span class="fc" id="L21">        this.explosionInitialTime = explosionInitialTime;</span>
-<span class="fc" id="L22">    }</span>
+<span class="nc" id="L17">    private boolean exploded =false;</span>
+
+<span class="nc" id="L19">    public Explosion(PApplet parent, float x, float y, int explosionInitialTime, SoundEffects soundEffects) {</span>
+<span class="nc" id="L20">        this.parent=parent;</span>
+<span class="nc" id="L21">        this.x = x;</span>
+<span class="nc" id="L22">        this.y = y;</span>
+<span class="nc" id="L23">        this.explosionInitialTime = explosionInitialTime;</span>
+<span class="nc" id="L24">        this.soundEffects = soundEffects;</span>
+<span class="nc" id="L25">    }</span>
     public void Explode(){
-<span class="fc" id="L24">        float explosionDuration = 200.0f; // Duration of the explosion animation in milliseconds</span>
-<span class="fc" id="L25">        float currentTime = (float)(parent.millis() - explosionInitialTime);</span>
+<span class="nc bnc" id="L27" title="All 2 branches missed.">        if(!exploded){</span>
+<span class="nc" id="L28">        float explosionDuration = 200.0f; // Duration of the explosion animation in milliseconds</span>
+<span class="nc" id="L29">        float currentTime = (float)(parent.millis() - explosionInitialTime);</span>
         
         // Calculate scaling factors for each circle based on elapsed time
-<span class="fc" id="L28">        float redScale = PApplet.map(currentTime, 0.0f, explosionDuration, 0.0f, 1.0f);</span>
-<span class="fc" id="L29">        float orangeScale = PApplet.map(currentTime, 0.0f, explosionDuration, 0.0f, 1.0f);</span>
-<span class="fc" id="L30">        float yellowScale = PApplet.map(currentTime, 0.0f, explosionDuration, 0.0f, 1.0f);</span>
+<span class="nc" id="L32">        float redScale = PApplet.map(currentTime, 0.0f, explosionDuration, 0.0f, 1.0f);</span>
+<span class="nc" id="L33">        float orangeScale = PApplet.map(currentTime, 0.0f, explosionDuration, 0.0f, 1.0f);</span>
+<span class="nc" id="L34">        float yellowScale = PApplet.map(currentTime, 0.0f, explosionDuration, 0.0f, 1.0f);</span>
         
-<span class="fc" id="L32">        float redExplosionRadius = explosionRadius * redScale;</span>
-<span class="fc" id="L33">        float orangelosionRadius = explosionRadius * 0.5f * yellowScale;</span>
-<span class="fc" id="L34">        float yellowExplosionRadius = explosionRadius * 0.2f * orangeScale;</span>
+<span class="nc" id="L36">        float redExplosionRadius = explosionRadius * redScale;</span>
+<span class="nc" id="L37">        float orangelosionRadius = explosionRadius * 0.5f * yellowScale;</span>
+<span class="nc" id="L38">        float yellowExplosionRadius = explosionRadius * 0.2f * orangeScale;</span>
         // Draw circles with scaled radii
-<span class="pc bpc" id="L36" title="1 of 2 branches missed.">        if (redExplosionRadius&lt;explosionRadius) {</span>
-<span class="nc" id="L37">            parent.fill(255, 0, 0); // Red circle</span>
-<span class="nc" id="L38">            parent.ellipse(x, y, redExplosionRadius, redExplosionRadius);</span>
-<span class="nc" id="L39">            parent.fill(255, 165, 0); // Orange circle</span>
-<span class="nc" id="L40">            parent.ellipse(x, y, orangelosionRadius, orangelosionRadius);</span>
-<span class="nc" id="L41">            parent.fill(255, 255, 0); // Yellow circle</span>
-<span class="nc" id="L42">            parent.ellipse(x, y, yellowExplosionRadius, yellowExplosionRadius);</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">        if (redExplosionRadius&lt;explosionRadius) {</span>
+<span class="nc" id="L41">            parent.fill(255, 0, 0); // Red circle</span>
+<span class="nc" id="L42">            parent.ellipse(x, y, redExplosionRadius, redExplosionRadius);</span>
+<span class="nc" id="L43">            parent.fill(255, 165, 0); // Orange circle</span>
+<span class="nc" id="L44">            parent.ellipse(x, y, orangelosionRadius, orangelosionRadius);</span>
+<span class="nc" id="L45">            parent.fill(255, 255, 0); // Yellow circle</span>
+<span class="nc" id="L46">            parent.ellipse(x, y, yellowExplosionRadius, yellowExplosionRadius);</span>
         }
-<span class="nc" id="L44">        LevelRenderer.updateTerrainAfterExplosion(Math.round(x),Math.round(y));</span>
-<span class="nc" id="L45">    }</span>
+<span class="nc" id="L48">        LevelRenderer.updateTerrainAfterExplosion(Math.round(x),Math.round(y));</span>
+<span class="nc" id="L49">        soundEffects.playExplosionSound();</span>
+        }
+<span class="nc" id="L51">        exploded = true;</span>
+<span class="nc" id="L52">    }</span>
     public float getX(){
-<span class="fc" id="L47">        return x;</span>
+<span class="nc" id="L54">        return x;</span>
     }
     public float getY(){
-<span class="fc" id="L50">        return y;</span>
+<span class="nc" id="L57">        return y;</span>
     }
     public int getExplosionInitialTime(){
-<span class="fc" id="L53">        return explosionInitialTime;</span>
+<span class="nc" id="L60">        return explosionInitialTime;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -63,7 +63,6 @@ public class ProjectileTest {
         Projectile projectile = new Projectile(mockApplet, x, y, power, CELLSIZE, rotationAngle, terrainArray, soundEffects, 0);
 
         projectile.display(); // Just test if it runs without errors
-        // You can add more assertions here to check if the display behavior is as expected
     }
 
     @Test
@@ -79,5 +78,45 @@ public class ProjectileTest {
         Projectile projectile = new Projectile(mockApplet, x, y, power, CELLSIZE, rotationAngle, terrainArray, soundEffects, 0);
 
         projectile.doExplosion();
+    }
+    @Test
+    public void testGetExplosionCoords() {
+        List<Float> terrainArray = new ArrayList<>();
+        SoundEffects soundEffects = new SoundEffects(mockApplet, minim);
+        float x = 100;
+        float y = 200;
+        float power = 50;
+        int CELLSIZE = 10;
+        float rotationAngle = 45;
+
+        Projectile projectile = new Projectile(mockApplet, x, y, power, CELLSIZE, rotationAngle, terrainArray, soundEffects, 0);
+
+        float explosionX = 150;
+        float explosionY = 250;
+        projectile.setExplosionCoords(explosionX, explosionY);
+
+        float[] explosionCoords = projectile.getExplosionCoords();
+        assertEquals(explosionX, explosionCoords[0]);
+        assertEquals(explosionY, explosionCoords[1]);
+    }
+
+    @Test
+    public void testSetExplosionCoords() {
+        List<Float> terrainArray = new ArrayList<>();
+        SoundEffects soundEffects = new SoundEffects(mockApplet, minim);
+        float x = 100;
+        float y = 200;
+        float power = 50;
+        int CELLSIZE = 10;
+        float rotationAngle = 45;
+
+        Projectile projectile = new Projectile(mockApplet, x, y, power, CELLSIZE, rotationAngle, terrainArray, soundEffects, 0);
+
+        float explosionX = 150;
+        float explosionY = 250;
+        projectile.setExplosionCoords(explosionX, explosionY);
+
+        assertEquals(explosionX, projectile.explosionX);
+        assertEquals(explosionY, projectile.explosionY);
     }
 }

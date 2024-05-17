@@ -68,7 +68,7 @@ public class App extends PApplet {
     public static List<Integer> damageToScore;
 
     private Gameover gameover;
-    private boolean isGameover = false;
+    public boolean isGameover = false;
 
     private Minim minim;
     private SoundEffects soundEffects;
@@ -146,7 +146,7 @@ public class App extends PApplet {
         settingUp=false;
     }
 
-    private void loadLevel() {
+    public void loadLevel() {
         settingUp=true;
         powerups = new Powerups();
         JSONParser parser = new JSONParser();
@@ -198,7 +198,7 @@ public class App extends PApplet {
         settingUp=false;
     }
 
-    public GUI getGUI(){
+    public static GUI getGUI(){
         return GUI;
     }
 

@@ -111,6 +111,9 @@ public class GUI {
         parent.fill(playerColors[currentPlayerIndex]);
         parent.rect(barX, barY, Math.round(playerHealths[currentPlayerIndex]*1.2), barHeight);
 
+        parent.fill(125);
+        parent.rect(Math.round(barX+playerPowers[currentPlayerIndex]*1.15)-3, barY, 11, barHeight);
+
         parent.fill(255);
         parent.rect(Math.round(barX+playerPowers[currentPlayerIndex]*1.15), barY, 5, barHeight);
     }
