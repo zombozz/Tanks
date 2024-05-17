@@ -4,6 +4,9 @@ import static processing.core.PApplet.round;
 
 import processing.core.PApplet;
 
+/**
+ * Represents an explosion in the game.
+ */
 public class Explosion {
     private PApplet parent;
     private float x;
@@ -15,7 +18,15 @@ public class Explosion {
     private int explosionInitialTime;
 
     private boolean exploded =false;
-
+    /**
+     * Constructs an explosion.
+     * 
+     * @param parent The PApplet parent.
+     * @param x The x-coordinate of the explosion.
+     * @param y The y-coordinate of the explosion.
+     * @param explosionInitialTime The initial time of the explosion.
+     * @param soundEffects The sound effects associated with the explosion.
+     */
     public Explosion(PApplet parent, float x, float y, int explosionInitialTime, SoundEffects soundEffects) {
         this.parent=parent;
         this.x = x;
@@ -23,6 +34,10 @@ public class Explosion {
         this.explosionInitialTime = explosionInitialTime;
         this.soundEffects = soundEffects;
     }
+
+    /**
+     * Triggers the explosion animation and sound.
+     */
     public void Explode(){
         if(!exploded){
         float explosionDuration = 200.0f; // Duration of the explosion animation in milliseconds
@@ -50,13 +65,31 @@ public class Explosion {
         }
         exploded = true;
     }
+
+    /**
+     * Gets the x-coordinate of the explosion.
+     * 
+     * @return The x-coordinate of the explosion.
+     */
     public float getX(){
         return x;
     }
-    public float getY(){
+
+    /**
+     * Gets the y-coordinate of the explosion.
+     * 
+     * @return The y-coordinate of the explosion.
+     */
+    public float getY() {
         return y;
     }
-    public int getExplosionInitialTime(){
+
+    /**
+     * Gets the initial time of the explosion.
+     * 
+     * @return The initial time of the explosion.
+     */
+    public int getExplosionInitialTime() {
         return explosionInitialTime;
     }
 }

@@ -26,9 +26,13 @@ import ddf.minim.*;
 import ddf.minim.spi.*;
 
 
-
+/**
+ * The main class representing the Tanks game application.
+ */
 public class App extends PApplet {
-    
+    /**
+     * Initialising everything that will be used in the Application
+     */
     AudioPlayer player;
     public static int levelNo = 0;
 
@@ -72,15 +76,22 @@ public class App extends PApplet {
 
     private Minim minim;
     private SoundEffects soundEffects;
-
+    /**
+     * Tells App to read configuration from config.json
+     */
     public App() {
         this.configPath = "config.json";
-    }
+    }    
+    /**
+    * Set the size of the App
+    */
 	@Override
     public void settings() {
         size(WIDTH, HEIGHT);
     }
-
+    /**
+    * Intialise variables
+    */
     PImage backgroundImage;
     PImage treesImage;
     String[] levelLines;
@@ -92,6 +103,10 @@ public class App extends PApplet {
         color(0, 255, 0),
     };
     int terrainColor;
+    /**
+    * Setup the application. Includes all initial setting variables, soundeffects, FPS, and most importantly level rendering.
+    * @since 1.0
+    */
 	@Override
     public void setup() {
         minim = new Minim(this);
@@ -145,7 +160,13 @@ public class App extends PApplet {
         levelRenderer.renderLevel();
         settingUp=false;
     }
-
+    /**
+     * Loads the level configuration and initializes necessary components for the level.
+     * 
+     * This method loads the level configuration from a JSON file, initializes powerups,
+     * sets up the graphical user interface, loads images, and sets up the level renderer.
+     * 
+     */
     public void loadLevel() {
         settingUp=true;
         powerups = new Powerups();
@@ -197,13 +218,28 @@ public class App extends PApplet {
         levelRenderer.updateTankScores(tankScores);
         settingUp=false;
     }
-
+    /**
+     * Retrieves the GUI instance.
+     * 
+     * This method returns the GUI instance used in the application.
+     * 
+     * @return The GUI instance.
+     * 
+     */
     public static GUI getGUI(){
         return GUI;
     }
 
+    /**
+     * Handles key pressed events.
+     * 
+     * This method handles key pressed events and performs corresponding actions such as moving tanks,
+     * adjusting turret angles, shooting, repairing tanks, adding fuel, or advancing to the next level.
+     * 
+     * @param event The key event object.
+     * @since 1.0
+     */
 	@Override
-    
     public void keyPressed(KeyEvent event){
         if (this.keyCode == 37) {//left
             tanks.get(selectedTankIndex).moveTank(-1);
@@ -235,6 +271,13 @@ public class App extends PApplet {
             nextLevel();
         }
     }
+
+    /**
+     * Advances to the next tank's turn.
+     * 
+     * This method selects the next tank.
+     * 
+     */
     public void nextTank(){
         selectedTankIndex+=1;
         if(selectedTankIndex >= tanksNum){
@@ -246,6 +289,13 @@ public class App extends PApplet {
         GUI.setCurrentPlayerIndex(selectedTankIndex);
         tanks.get(selectedTankIndex).drawTankArrow(arrowImage);
     }
+    /**
+     * Checks the remaining tanks in the level.
+     * 
+     * This method checks the number of remaining tanks in the level and triggers
+     * actions accordingly, such as advancing to the next level.
+     * 
+     */
     public void checkTanksRemaining(){
         int i = 0;
         for (Tank tank : tanks) {
@@ -257,7 +307,13 @@ public class App extends PApplet {
             nextLevel();
         }
     }
-
+    /**
+     * Advances to the next level.
+     * 
+     * This method advances to the next level, resets tanks, reloads the level configuration,
+     * and updates game state if all tanks are destroyed.
+     * @throws IndexOutOfBoundsException if there are no more levels, initialising gameover.
+     */ 
     public void nextLevel(){
         try{
             levelNo+=1;
@@ -277,7 +333,13 @@ public class App extends PApplet {
             }
         }
     }
-    
+    /**
+     * Handles key released events.
+     * 
+     * This method handles key released events, particularly for stopping tank movement sounds.
+     * 
+     * @since 1.0
+     */
 	@Override
     public void keyReleased(){
         if (this.keyCode == 37) {//left
@@ -286,6 +348,14 @@ public class App extends PApplet {
             tanks.get(selectedTankIndex).stopTankMoveSound();
         }
     }
+
+    /**
+     * Draws the game elements on the screen.
+     * 
+     * This method renders the game elements, including tanks, projectiles, GUI elements, and background.
+     * 
+     * @since 1.0
+     */
 	@Override
     public void draw() {
         if(!settingUp){
@@ -320,7 +390,14 @@ public class App extends PApplet {
             checkTanksRemaining();
         }
     }
-        
+    /**
+     * Main method to start the application.
+     * 
+     * This method is the entry point of the application and starts the PApplet.
+     * 
+     * @param args Command-line arguments.
+     * @since 1.0
+     */    
     public static void main(String[] args) {
         PApplet.main("Tanks.App");
     }

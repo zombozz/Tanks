@@ -6,7 +6,16 @@ import java.util.HashMap;
 import java.util.Map;
 import processing.core.PApplet;
 
+/**
+ * Represents the game over screen.
+ */
 public class Gameover {
+    /**
+     * Constructs the game over screen.
+     * 
+     * @param parent The PApplet parent.
+     * @param tankScores The scores of the tanks.
+     */
     public Gameover(PApplet parent, List<Integer> tankScores) {
         int w = App.WIDTH;
         int h = App.HEIGHT;
@@ -39,12 +48,7 @@ public class Gameover {
         parent.fill(255);
         parent.text("Final Scores:", centerWidth-5, h / 3+30);
         parent.textSize(16);
-
-        // Sort tank scores in descending order
         List<Character> tankKeys = sortScoresDescending(tankScoresMap);
-        
-        // Display scores with a delay of 0.7s
-
         parent.fill(255);
         for (int i = 0; i < tankKeys.size(); i++) {
             int startTime = parent.millis();
@@ -52,7 +56,7 @@ public class Gameover {
             int score = tankScoresMap.get(tank);
             String playerName = "Player " + tank;
             String scoreText = playerName + ": " + score;
-            int delay = 1000; // Delay in milliseconds
+            int delay = 7000; 
             displayScoreWithDelay(parent, scoreText, centerWidth, h / 2 - 100 + pt, delay, i, startTime);
             pt += 30;
         }
@@ -60,6 +64,12 @@ public class Gameover {
         parent.text("Press 'r' to restart", centerWidth-5, h * 5 / 6);
     }
 
+    /**
+     * Gets the winner based on the tank scores.
+     * 
+     * @param tankScoresMap The map containing tank scores.
+     * @return The character representing the winner.
+     */
     public char getWinner(Map<Character, Integer> tankScoresMap) {
         char winner = 'A';
         int maxScore = Integer.MIN_VALUE;
@@ -72,14 +82,29 @@ public class Gameover {
         return winner;
     }
 
-    // Method to sort tank scores in descending order
+    /**
+     * Sorts tank scores in descending order.
+     * 
+     * @param tankScoresMap The map containing tank scores.
+     * @return The list of tank keys sorted in descending order of scores.
+     */
     public List<Character> sortScoresDescending(Map<Character, Integer> tankScoresMap) {
         List<Character> tankKeys = new ArrayList<>(tankScoresMap.keySet());
         tankKeys.sort((t1, t2) -> tankScoresMap.get(t2) - tankScoresMap.get(t1));
         return tankKeys;
     }
 
-    // Method to display score with delay
+    /**
+     * Displays score with a delay.
+     * 
+     * @param parent The PApplet parent.
+     * @param scoreText The text to display.
+     * @param x The x-coordinate.
+     * @param y The y-coordinate.
+     * @param delay The delay in milliseconds.
+     * @param index The index of the score.
+     * @param startTime The start time of the game over screen.
+     */
     public void displayScoreWithDelay(PApplet parent, String scoreText, int x, int y, int delay, int index, int startTime) {
         parent.fill(255); // Set text color to white
         // if (startTime > delay * (index + 1)) {

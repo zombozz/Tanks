@@ -6,13 +6,22 @@ import java.util.Map;
 import processing.core.PApplet;
 import processing.core.PImage;
 import java.util.*;
-
+/**
+ * Smooths the terrain by calculating moving averages.
+ */
 public class TerrainSmooth {
     private Map<Integer, Integer> heights = new HashMap<>();
     private PApplet parent;
     private int terrainColor;
     private int CELLSIZE;
 
+    /**
+     * Constructs a TerrainSmooth object.
+     * @param parent The parent PApplet.
+     * @param terrainColor The color of the terrain.
+     * @param CELLSIZE The size of the cells.
+     * @param heights The map containing heights data.
+     */
     public TerrainSmooth(PApplet parent, int terrainColor, int CELLSIZE, Map<Integer, Integer> heights) {
         this.heights = heights;
         this.parent = parent;
@@ -20,6 +29,10 @@ public class TerrainSmooth {
         this.CELLSIZE = CELLSIZE;
     }
 
+    /**
+     * Smooths the terrain.
+     * @return A list of smoothed heights.
+     */
     public List<Float> smooth() {
         List<Integer> sortedHeights = new ArrayList<>();
         List<Integer> multipliedHeights = new ArrayList<>();
@@ -40,8 +53,8 @@ public class TerrainSmooth {
             for (int j = i; j < i + 32; j++) {
                 sum += multipliedHeights.get(j);
             }
-            float average = sum / 32; // Compute average
-            smoothedHeights.add(average); // Add average to the smoothed heights list
+            float average = sum / 32; 
+            smoothedHeights.add(average);
         }
         for (int k = 0; k < 32; k++) {
             smoothedHeights.add(smoothedHeights.get(smoothedHeights.size() - 1));
@@ -51,13 +64,12 @@ public class TerrainSmooth {
             for (int j = i; j < i + 32; j++) {
                 sum += smoothedHeights.get(j);
             }
-            float average = sum / 32; // Compute average
-            smoothedHeights2.add(average); // Add average to the smoothed heights list
+            float average = sum / 32; 
+            smoothedHeights2.add(average); 
         }
         for (int k = 0; k < 32; k++) { 
             smoothedHeights2.add(smoothedHeights2.get(smoothedHeights2.size() - 1));
         }
         return smoothedHeights2;
     }
-    
 }

@@ -6,6 +6,9 @@ import ddf.minim.*;
 import processing.core.PApplet;
 import processing.core.PImage;
 
+/**
+ * Tank objects representing each player.
+ */
 public class Tank {
     private PApplet parent;
     public char c;
@@ -71,6 +74,17 @@ public class Tank {
 
 
     private boolean finalHealthAdded = false;
+    /**
+     * Constructs a Tank object.
+     * @param parent The parent PApplet.
+     * @param c The character representing the tank.
+     * @param colors The array of colors for the tank.
+     * @param x The x-coordinate of the tank.
+     * @param y The y-coordinate of the tank.
+     * @param size The size of the tank.
+     * @param smoothedTerrainArray The list of smoothed terrain array.
+     * @param GUI The GUI object.
+     */
     public Tank(PApplet parent, char c, int[] colors, int x, float y, int size, List<Float> smoothedTerrainArray, GUI GUI) {
         projectiles = new ArrayList<>();
         this.parent = parent;
@@ -86,6 +100,10 @@ public class Tank {
         soundEffects = new SoundEffects(parent, minim);
     }
 
+    /**
+     * Gets the coordinates of the projectile.
+     * @return The coordinates of the projectile.
+     */
     public float[] getProjectile(){
         try {
             return projectile.getExplosionCoords();
@@ -93,6 +111,10 @@ public class Tank {
             return null;
         }
     }
+
+    /**
+     * Checks the damage taken by the tank.
+     */
     public void checkDamage(){
         damage = 0;
         latestProjectilesCoords = App.latestProjectile;
@@ -116,6 +138,10 @@ public class Tank {
     }catch (NullPointerException  | IndexOutOfBoundsException e){}
     }
 
+    /**
+     * Gets the damage received by the tank.
+     * @return A list containing the damage received and which tank was shot.
+     */
     public List<Integer> getDamageRecieved() {
         // List<Integer> damageReceived = new ArrayList<>();
         damageReceived = new ArrayList<>();
@@ -138,6 +164,9 @@ public class Tank {
         }
     }
 
+    /**
+     * Checks if the tank is falling.
+     */
     public void checkIfTankFall() {
         int fallingStartTime;
         if (parachutesRemaining>0 && tankY > previousTankY && tankX == previousTankX) {
@@ -158,6 +187,10 @@ public class Tank {
         previousTankY = tankY;
     }
 
+    /**
+     * Moves the tank.
+     * @param moveTankBy The amount to move the tank by.
+     */
     public void moveTank(int moveTankBy) {
         
         if(tankAlive && (tankX+moveTankBy > 0) && (tankX+moveTankBy < App.WIDTH)) {
@@ -174,10 +207,17 @@ public class Tank {
         render(smoothedTerrainArray);
     }
 
+    /**
+     * Stops the tank move sound.
+     */
     public void stopTankMoveSound(){
         soundEffects.stopTankMoveSound();
     }
 
+    /**
+     * Changes the power of the tank.
+     * @param power The amount to change the power by.
+     */
     public void changePower(int power){
         playerPower+=power;
         if(playerPower > playerHealth){
@@ -187,43 +227,73 @@ public class Tank {
         }
     }
 
+    /**
+     * Sets the score of the tank.
+     * @param playerScore The score of the tank.
+     */
     public void setScore(int playerScore){
         this.playerScore=playerScore;
     }
+
+    /**
+     * Adds to the score of the tank.
+     * @param playerScore The score to add.
+     */
     public void addScore(int playerScore){
         this.playerScore+=playerScore;
     }
-    
+
+    /**
+     * Explodes the tank.
+     */
     public void explodeTank(){
         explosion.Explode();
     }
 
+    /**
+     * Resets the tank.
+     * @return The score of the tank.
+     */
     public int tankReset(){
         return playerScore;
     }
 
+    /**
+     * Moves the turret.
+     * @param moveTurret The amount to move the turret by.
+     */
     public void moveTurret(int moveTurret) {
         soundEffects.playTurretSound();
         this.moveTurretBy+=moveTurret;
         render(smoothedTerrainArray);
     }
 
+    /**
+     * Shoots the turret.
+     */
     public void shootTurret() {
-        float projectileSpeed = playerPower; // Set the speed of the projectile
+        float projectileSpeed = playerPower; 
         projectile = new Projectile(parent, tankX, tankY - 10, projectileSpeed, CELLSIZE, moveTurretBy, smoothedTerrainArray,soundEffects, windForce);
         projectiles.add(projectile);
         windForce+=(int) (Math.random() *(10) -5);
     }
 
+    /**
+     * Renders the GUI.
+     * @param i Index of the tank.
+     */
     public void renderGUI(int i){
         if(GUI.getCurrentPlayerIndex()+1 ==i){
             GUI.setPlayerDetails(playerFuel, playerHealth, playerPower, playerScore, windForce, parachutesRemaining);
         } 
         GUI.setPlayerScores(i, playerScore, playerHealth);
     }
-    
+
+    /**
+     * Renders the tank.
+     * @param smoothedTerrainArray List of smoothed terrain array.
+     */  
     public void render(List<Float> smoothedTerrainArray) {
-        // System.out.println(playerScore);
         if(tankAlive){
         checkDamage();
         this.smoothedTerrainArray = smoothedTerrainArray;
@@ -283,50 +353,117 @@ public class Tank {
         }
         }
     }
+    /**
+     * Gets the tank's character.
+     * @return The tank's character.
+     */
     public char getC(){
         return c;
     }
+    
+    /**
+     * Gets the movement of the tank.
+     * @return The movement of the tank.
+     */
     public float getTankMovement(){
         return moveTankBy;
     }
+    
+    /**
+     * Gets the Y coordinate of the tank.
+     * @return The Y coordinate of the tank.
+     */
     public float getY(){
         return tankY;
     }
+    
+    /**
+     * Sets the player number.
+     * @param playerNum The player number.
+     */
     public void setPlayerNum(int playerNum){
         this.playerNum = playerNum;
     }
 
+    /**
+     * Draws the tank arrow.
+     * @param arrowImage The arrow image.
+     */
     public void drawTankArrow(PImage arrowImage){
         this.arrowImage = arrowImage;
         drawArrow = true;
         arrowStartTime = parent.millis();
     }
+    
+    /**
+     * Gets information about the tank.
+     * @return Information about the tank.
+     */
     public String getInfo() {
         String bruh = c + "  "+ Integer.toString(x) +  "  "+ Float.toString(y);
         return bruh;
     }
 
+    /**
+     * Takes damage.
+     * @param damage The amount of damage to take.
+     */
     public void takeDamage(int damage) {
         playerHealth -= damage;
     }
+
+    /**
+     * Heals the tank.
+     * @param health The amount of health to add.
+     */
     public void heal(int health) {
         playerHealth+=health;
     }
+
+    /**
+     * Sets the health of the tank.
+     * @param health The health of the tank.
+     */
     public void setHealth(int health) {
         playerHealth=health;
     }
+
+    /**
+     * Sets the fuel of the tank.
+     * @param fuel The fuel of the tank.
+     */
     public void setFuel(int fuel) {
         playerFuel+=fuel;
     }
+
+    /**
+     * Gets the health of the tank.
+     * @return The health of the tank.
+     */
     public int getHealth() {
         return playerHealth;
     }
+
+    /**
+     * Gets the score of the tank.
+     * @return The score of the tank.
+     */
     public int getScore() {
         return playerScore;
     }
+
+    /**
+     * Gets the fuel of the tank.
+     * @return The fuel of the tank.
+     */
     public int getFuel() {
         return playerFuel;
     }
+
+    /**
+     * Gets the color of the tank.
+     * @return The color of the tank.
+     */
     public int[] getColor() {
         return colors;
     }

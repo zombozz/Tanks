@@ -7,7 +7,9 @@ import static processing.core.PApplet.sin;
 import java.util.List;
 import ddf.minim.*;
 import com.jogamp.opengl.util.packrect.Level;
-
+/**
+ * The class for each projectile object shot by a tank.
+ */
 public class Projectile {
     public PApplet parent;
     public float x;
@@ -31,6 +33,18 @@ public class Projectile {
     public float explosionX = 0;
     public float explosionY = 0;
 
+    /**
+     * Constructs a Projectile object.
+     * @param parent The parent PApplet.
+     * @param x The initial x-coordinate of the projectile.
+     * @param y The initial y-coordinate of the projectile.
+     * @param power The initial power of the projectile.
+     * @param CELLSIZE The size of each cell in the terrain.
+     * @param rotationAngle The initial rotation angle of the projectile.
+     * @param smoothedTerrainArray The list containing smoothed terrain heights.
+     * @param soundEffects The SoundEffects object for playing sounds.
+     * @param windForce The initial wind force affecting the projectile.
+     */
     public Projectile(PApplet parent, float x, float y, float power, int CELLSIZE, float rotationAngle, List<Float> smoothedTerrainArray, SoundEffects soundEffects, int windForce) {
         this.soundEffects = soundEffects;
         this.parent = parent;
@@ -46,20 +60,32 @@ public class Projectile {
         initialTime = parent.millis();
         soundEffects.playPopSound();
     }
+
+    /**
+     * Retrieves the coordinates of the explosion.
+     * @return An array containing the x-coordinate, y-coordinate, and initial time of the explosion.
+     */
     public float[] getExplosionCoords(){
         return new float[]{explosionX, explosionY, explosionInitialTime};
     }
-    
+
+    /**
+     * Sets the coordinates of the explosion.
+     * @param x The x-coordinate of the explosion.
+     * @param y The y-coordinate of the explosion.
+     */
     public void setExplosionCoords(float x, float y){
         this.explosionX = x;
         this.explosionY = y;
     }
+
+    /**
+     * Initiates the explosion effect.
+     */
     public void doExplosion() {
-        // soundEffects.playExplosionSound();
         if(!didItExplode){
             explosionInitialTime = parent.millis();
             didItExplode = true;
-            System.out.println("no");
             setExplosionCoords(x, y);
         }
         Explosion explosion = new Explosion(parent, x, y, explosionInitialTime, soundEffects);
@@ -67,18 +93,19 @@ public class Projectile {
             try {
                 explosion.Explode();
             } catch (NullPointerException e)  {
-
             }
         }else{
-            
             isNull = true;
         }
     }
+
+    /**
+     * Updates the projectile's position and velocity.
+     */
     public void update() {   
-        
         float angleInRadians = PApplet.radians(rotationAngle);
-        float vx = power /5* cos(angleInRadians); // Calculate the x-component of velocity
-        float vy = power /5* sin(angleInRadians); // Calculate the y-component of velocity
+        float vx = power / 5 * cos(angleInRadians); // Calculate the x-component of velocity
+        float vy = power / 5 * sin(angleInRadians); // Calculate the y-component of velocity
         if  (smoothedTerrainArray.size() > x) {
             try{
                 y1 = smoothedTerrainArray.get(Math.round(x));
@@ -87,8 +114,6 @@ public class Projectile {
                 } else {
                     gravity+=3.6;
                     x+=windForce*0.03;
-                    //do trajectory
-                    // y += gravity*power/10;
                     y += gravity/5;
                     x += vx; // Update x position
                     y += vy; // Update y position     
@@ -96,6 +121,10 @@ public class Projectile {
             } catch (IndexOutOfBoundsException e) {}
         }
     }
+
+    /**
+     * Displays the projectile.
+     */
     public void display() {
         if(parent!= null) {
             if(!didItExplode) {
